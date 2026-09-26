@@ -12,3 +12,12 @@ dist/
 
 # Volcados de sondeo: llevan el texto de las facturas (nombre, direccion, CUPS).
 sondeo/
+
+# Dataset curado de la Plataforma de ForoCoches: se usa en local, no se republica.
+# Quien lo quiera, que baje el Excel del hilo y ejecute: npm run actualizar
+datos/tarifas-excel.json
+app/public/tarifas-excel.json
+
+# Ficheros de la etapa anterior, cuando las dos fuentes iban juntas
+datos/tarifas.json
+app/public/tarifas.json

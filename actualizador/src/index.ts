@@ -17,8 +17,23 @@ import { ranking } from '../../motor/motor.ts';
  */
 
 const RAIZ = path.resolve(import.meta.dirname, '../..');
-const SALIDA = path.join(RAIZ, 'datos', 'tarifas.json');
 const TMP = path.join(RAIZ, 'tmp', 'actualizar');
+
+// Dos ficheros a proposito, y los dos van tambien a app/public/ para el build:
+//
+//  - tarifas-cnmc.json   PUBLICO. Datos del comparador oficial de la CNMC:
+//                        precios que las comercializadoras estan obligadas a
+//                        registrar. Hechos publicos, se pueden republicar.
+//
+//  - tarifas-excel.json  LOCAL, fuera de git. Es el dataset CURADO de la
+//                        Plataforma de ForoCoches: su seleccion, su trabajo de
+//                        actualizacion y su modelo de excedentes. Usarlo uno
+//                        mismo es justo para lo que lo publican; republicarlo
+//                        en un servicio abierto es otra cosa. Quien quiera esa
+//                        parte, que se baje el Excel del hilo y ejecute esto.
+const SALIDA_CNMC = path.join(RAIZ, 'datos', 'tarifas-cnmc.json');
+const SALIDA_EXCEL = path.join(RAIZ, 'datos', 'tarifas-excel.json');
+const PUBLIC = path.join(RAIZ, 'app', 'public');
 
 const log = (...a: unknown[]) => console.log(new Date().toISOString().slice(11, 19), ...a);
 
@@ -54,7 +69,7 @@ async function main() {
   }
 
   // Diff contra lo que ya teniamos, para saber que ha cambiado esta semana.
-  const previo = await fs.readFile(SALIDA, 'utf8').then(JSON.parse).catch(() => null);
+  const previo = await fs.readFile(SALIDA_EXCEL, 'utf8').then(JSON.parse).catch(() => null);
   if (previo) {
     const antes = new Map(previo.tarifas.map((t: any) => [t.comercializadora + '|' + t.tarifa, t]));
     let cambios = 0;
@@ -117,22 +132,36 @@ async function main() {
     log(`  ${contraste.length} tarifas presentes en las dos fuentes`);
   }
 
-  await fs.mkdir(path.dirname(SALIDA), { recursive: true });
-  await fs.writeFile(SALIDA, JSON.stringify({
+  await fs.mkdir(path.join(RAIZ, 'datos'), { recursive: true });
+  await fs.mkdir(PUBLIC, { recursive: true });
+
+  const escribir = async (destino: string, copia: string, contenido: unknown) => {
+    const txt = JSON.stringify(contenido, null, 2);
+    await fs.writeFile(destino, txt);
+    await fs.writeFile(path.join(PUBLIC, copia), txt);
+  };
+
+  if (cnmc) {
+    await escribir(SALIDA_CNMC, 'tarifas-cnmc.json', {
+      generado: datos.generado,
+      fuente: 'Comparador oficial de ofertas de la CNMC',
+      codigoPostal: cnmc.codigoPostal,
+      verificadas: `${cnmc.cuadran}/${cnmc.total}`,
+      tarifas: cnmc.tarifas.filter(t => !t.sospechosa),
+    });
+    log(`Escrito ${SALIDA_CNMC}`);
+  }
+
+  await escribir(SALIDA_EXCEL, 'tarifas-excel.json', {
     generado: datos.generado,
     actualizadoExcel: datos.actualizadoExcel,
     fuente: { hilo: hilo.titulo, volumen: hilo.volumen, excel: hilo.urlExcel },
     verificacion: { comparadas: res.length, divergencias: fallos.length },
     constantes: datos.constantes,
     tarifas: datos.tarifas,
-    cnmc: cnmc && {
-      codigoPostal: cnmc.codigoPostal,
-      verificadas: `${cnmc.cuadran}/${cnmc.total}`,
-      tarifas: cnmc.tarifas.filter(t => !t.sospechosa),
-    },
     contraste,
-  }, null, 2));
-  log(`Escrito ${SALIDA}`);
+  });
+  log(`Escrito ${SALIDA_EXCEL} (local, fuera de git)`);
 }
 
 main().catch(e => { console.error('FALLO:', e.message); process.exit(1); });

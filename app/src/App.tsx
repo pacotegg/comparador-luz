@@ -4,14 +4,25 @@ import { leerPDF, type Resultado as Lectura } from './pdf.ts';
 import { Panel, Campo, Boton, Aviso, ZonaPDF, eur, kwh } from './componentes.tsx';
 import { ResultadosCNMC } from './resultados-cnmc.tsx';
 
-interface Datos {
+/** Datos del comparador oficial. Siempre presentes: van en el repo publico. */
+interface DatosCNMC {
+  generado: string;
+  verificadas: string;
+  tarifas: OfertaCNMC[];
+}
+
+/**
+ * Dataset curado de la Plataforma de ForoCoches. NO va en el repo publico: es su
+ * trabajo de seleccion y actualizacion, y ademas es lo unico que modela los
+ * excedentes solares. Quien lo quiera, que baje el Excel del hilo y ejecute
+ * `npm run actualizar`. La app funciona sin el, solo que sin excedentes.
+ */
+interface DatosExcel {
   actualizadoExcel: string;
   fuente: { hilo: string; volumen: string; excel: string };
   verificacion: { comparadas: number; divergencias: number };
   constantes: Constantes;
   tarifas: (TarifaCalculable & { ultimoCambio: string | null; nota: string | null; permanencia: string | null })[];
-  cnmc: { codigoPostal: string; verificadas: string; tarifas: OfertaCNMC[] } | null;
-  contraste: { tarifa: string; diferencia: number; ultimoCambioExcel: string | null }[];
 }
 
 type Fuente = 'excel' | 'cnmc';
@@ -25,35 +36,42 @@ const REPARTOS = [
 const VACIO: Consumo = { dias: 30, potP1: 0, potP2: 0, cPunta: 0, cLlano: 0, cValle: 0, excedentes: 0 };
 
 export default function App() {
-  const [datos, setDatos] = useState<Datos | null>(null);
+  const [cnmc, setCnmc] = useState<DatosCNMC | null>(null);
+  const [excel, setExcel] = useState<DatosExcel | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [consumo, setConsumo] = useState<Consumo>(VACIO);
   const [lectura, setLectura] = useState<Lectura | null>(null);
   const [cargando, setCargando] = useState(false);
   const [todas, setTodas] = useState(false);
   const [detalle, setDetalle] = useState<string | null>(null);
-  const [fuente, setFuente] = useState<Fuente>('excel');
+  const [fuente, setFuente] = useState<Fuente>('cnmc');
 
   useEffect(() => {
-    fetch('./tarifas.json')
+    fetch('./tarifas-cnmc.json')
       .then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); })
-      .then(setDatos)
-      .catch(e => setError(`No he podido cargar las tarifas: ${e.message}`));
+      .then(setCnmc)
+      .catch(e => setError(`No he podido cargar las ofertas de la CNMC: ${e.message}`));
+
+    // Opcional a proposito: en el despliegue publico este fichero no existe.
+    fetch('./tarifas-excel.json')
+      .then(r => (r.ok ? r.json() : null))
+      .then(d => { if (d) { setExcel(d); setFuente('excel'); } })
+      .catch(() => { /* sin Excel se trabaja solo con la CNMC */ });
   }, []);
 
   const total = consumo.cPunta + consumo.cLlano + consumo.cValle;
   const listo = consumo.dias > 0 && consumo.potP1 > 0 && total > 0;
 
   const resultados = useMemo<Resultado[]>(
-    () => (datos && listo ? ranking(datos.tarifas, consumo, datos.constantes) : []),
-    [datos, consumo, listo],
+    () => (excel && listo ? ranking(excel.tarifas, consumo, excel.constantes) : []),
+    [excel, consumo, listo],
   );
 
   // Las de la CNMC se ordenan por el SEGUNDO ano: es lo que se paga cuando la
   // promocion caduca. Ordenarlas por el primero premia a las ofertas gancho.
   const resultadosCNMC = useMemo(
-    () => (datos?.cnmc && listo ? rankingCNMC(datos.cnmc.tarifas, consumo, 'segundo') : []),
-    [datos, consumo, listo],
+    () => (cnmc && listo ? rankingCNMC(cnmc.tarifas, consumo, 'segundo') : []),
+    [cnmc, consumo, listo],
   );
 
   async function subir(f: File) {
@@ -90,7 +108,9 @@ export default function App() {
         <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Comparador de luz</h1>
         <p className="mt-1.5 text-sm text-[var(--color-tenue)]">
           Con las tarifas del Excel de la Plataforma de ForoCoches.{' '}
-          {datos && <>Actualizado el {new Date(datos.actualizadoExcel).toLocaleDateString('es-ES')}.</>}
+          {excel
+            ? <>Actualizado el {new Date(excel.actualizadoExcel).toLocaleDateString('es-ES')}.</>
+            : <>Ofertas del comparador oficial de la CNMC.</>}
         </p>
       </header>
 
@@ -165,9 +185,9 @@ export default function App() {
           ) : (
             <>
               <div className="flex gap-1.5 rounded-xl border border-[var(--color-borde)] bg-black/20 p-1">
-                {([['excel', 'Recomendadas', `${datos!.tarifas.length} del Excel`],
-                   ['cnmc', 'Todas', `${datos!.cnmc?.tarifas.length ?? 0} de la CNMC`]] as const).map(([k, t, sub]) => (
-                  <button key={k} onClick={() => setFuente(k)} disabled={k === 'cnmc' && !datos!.cnmc}
+                {([['excel', 'Recomendadas', excel ? `${excel.tarifas.length} del Excel` : 'sin el Excel'],
+                   ['cnmc', 'Todas', `${cnmc?.tarifas.length ?? 0} de la CNMC`]] as const).map(([k, t, sub]) => (
+                  <button key={k} onClick={() => setFuente(k)} disabled={k === 'excel' && !excel}
                     className={`flex-1 rounded-lg px-3 py-2 text-sm transition disabled:opacity-30
                       ${fuente === k ? 'bg-[var(--color-acento)] font-semibold text-slate-950' : 'text-[var(--color-tenue)] hover:text-[var(--color-tinta)]'}`}>
                     {t}<span className={`ml-1.5 text-[11px] ${fuente === k ? 'text-slate-700' : ''}`}>{sub}</span>
@@ -175,14 +195,14 @@ export default function App() {
                 ))}
               </div>
 
-              {fuente === 'cnmc' && datos!.cnmc ? (
-                <ResultadosCNMC res={resultadosCNMC} verificadas={datos!.cnmc.verificadas} excedentes={consumo.excedentes} />
+              {fuente === 'cnmc' || !excel ? (
+                <ResultadosCNMC res={resultadosCNMC} verificadas={cnmc?.verificadas ?? '?'} excedentes={consumo.excedentes} />
               ) : (
               <>
               <Panel titulo="Las 5 más baratas para ti">
                 <ol className="space-y-2.5">
                   {resultados.slice(0, 5).map(r => {
-                    const t = datos!.tarifas.find(x => x.comercializadora === r.comercializadora && x.tarifa === r.tarifa);
+                    const t = excel!.tarifas.find(x => x.comercializadora === r.comercializadora && x.tarifa === r.tarifa);
                     const id = r.comercializadora + r.tarifa;
                     return (
                       <li key={id} className={`rounded-xl border p-3.5 transition
@@ -243,7 +263,7 @@ export default function App() {
                 <>
                   Precios sin impuestos, como manda el hilo: las compañías publican mal los
                   precios con impuestos. El total sí los lleva.{' '}
-                  {datos && `Motor verificado contra el Excel: ${datos.verificacion.comparadas - datos.verificacion.divergencias}/${datos.verificacion.comparadas}.`}
+                  {excel && `Motor verificado contra el Excel: ${excel.verificacion.comparadas - excel.verificacion.divergencias}/${excel.verificacion.comparadas}.`}
                 </>
               }>
                 <Boton tipo="suave" onClick={() => setTodas(t => !t)}>
