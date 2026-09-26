@@ -107,10 +107,9 @@ export default function App() {
       <header className="mb-7">
         <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Comparador de luz</h1>
         <p className="mt-1.5 text-sm text-[var(--color-tenue)]">
-          Con las tarifas del Excel de la Plataforma de ForoCoches.{' '}
           {excel
-            ? <>Actualizado el {new Date(excel.actualizadoExcel).toLocaleDateString('es-ES')}.</>
-            : <>Ofertas del comparador oficial de la CNMC.</>}
+            ? <>Con las tarifas del Excel de la Plataforma de ForoCoches, actualizado el {new Date(excel.actualizadoExcel).toLocaleDateString('es-ES')}.</>
+            : <>Con las ofertas registradas en el comparador oficial de la CNMC.</>}
         </p>
       </header>
 
