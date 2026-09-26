@@ -5,7 +5,7 @@
 # sin sesion iniciada: todas las rutas son absolutas porque el entorno de logon
 # no tiene PATH.
 #
-# Registrar la tarea:  ver el final de este fichero.
+# Registrar la tarea: ver el final de este fichero.
 
 $ErrorActionPreference = 'Stop'
 
@@ -25,21 +25,44 @@ function Abortar([string]$Motivo) {
     exit 1
 }
 
+# git y node escriben por stderr aunque todo vaya bien (el progreso del push, por
+# ejemplo). Con ErrorActionPreference en Stop, PowerShell 5.1 lo toma por un
+# fallo y revienta el script despues de haber hecho el trabajo. Aqui se baja la
+# guardia solo durante la llamada y se mira el codigo de salida, que es el que
+# de verdad dice si fue bien.
+function Nativo {
+    param([string]$Exe, [string[]]$Argumentos, [string]$Que, [switch]$Silencioso)
+    $previo = $ErrorActionPreference
+    $ErrorActionPreference = 'Continue'
+    try {
+        $salida = & $Exe @Argumentos 2>&1
+        $codigo = $LASTEXITCODE
+    } finally {
+        $ErrorActionPreference = $previo
+    }
+    if (-not $Silencioso) { $salida | ForEach-Object { Registro "  $_" } }
+    if ($codigo -ne 0) { Abortar "$Que salio con codigo $codigo" }
+    return $salida
+}
+
 Registro '--- empieza la actualizacion semanal ---'
 Set-Location -LiteralPath $Raiz
 
 # 1. Descargar, recalcular y verificar -------------------------------------
-& $Node 'actualizador\src\index.ts' 2>&1 | ForEach-Object { Registro "  $_" }
-if ($LASTEXITCODE -ne 0) { Abortar "el actualizador salio con codigo $LASTEXITCODE" }
+Nativo $Node @('actualizador\src\index.ts') 'el actualizador' | Out-Null
 
 # 2. Que solo haya cambiado lo que puede cambiar ----------------------------
 # Si aparece cualquier otro fichero, algo no va como esperamos: no se empuja.
-$cambios = & $Git status --porcelain
-if (-not $cambios) { Registro 'sin cambios que publicar'; Registro '--- fin ---'; exit 0 }
+$cambios = @(Nativo $Git @('status', '--porcelain') 'git status' -Silencioso)
+if ($cambios.Count -eq 0) {
+    Registro 'sin cambios que publicar'
+    Registro '--- fin ---'
+    exit 0
+}
 
 $permitidos = @('datos/tarifas-cnmc.json', 'app/public/tarifas-cnmc.json')
 foreach ($linea in $cambios) {
-    $ruta = ($linea.Substring(3)).Trim('"')
+    $ruta = ([string]$linea).Substring(3).Trim('"')
     if ($permitidos -notcontains $ruta) {
         Registro "cambio inesperado: $ruta"
         Abortar 'hay cambios fuera de los ficheros de datos publicos'
@@ -49,35 +72,44 @@ Registro "cambios a publicar: $($cambios.Count) fichero(s)"
 
 # 3. Barrido de secretos ANTES de empujar -----------------------------------
 # El repo es publico. Esto mira lo que se va a empujar, no la carpeta entera.
-& $Git add -A
+Nativo $Git @('add', '-A') 'git add' -Silencioso | Out-Null
+
 $patron = 'duckdns|no-ip\.|dyndns|([0-9]{1,3}\.){3}[0-9]{1,3}|([0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}|@gmail|api[_-]?key|password|ES[0-9]{16}'
-$sospechoso = & $Git diff --cached -U0 |
-    Select-String -Pattern '^\+' |
+$anyadidas = @(Nativo $Git @('diff', '--cached', '-U0') 'git diff' -Silencioso) |
+    Where-Object { ([string]$_).StartsWith('+') }
+$sospechoso = $anyadidas |
     Select-String -Pattern $patron |
     Select-String -Pattern '192\.168\.|127\.0\.0\.1|0\.0\.0\.0|localhost|js-tokens' -NotMatch
 
 if ($sospechoso) {
-    foreach ($s in $sospechoso) { Registro "  sospechoso: $($s.Line.Substring(0, [Math]::Min(120, $s.Line.Length)))" }
-    & $Git reset | Out-Null
+    foreach ($s in $sospechoso) {
+        $t = [string]$s
+        Registro ("  sospechoso: " + $t.Substring(0, [Math]::Min(120, $t.Length)))
+    }
+    Nativo $Git @('reset') 'git reset' -Silencioso | Out-Null
     Abortar 'el barrido ha encontrado algo que no debe publicarse'
 }
 Registro 'barrido limpio'
 
 # Y que el dataset curado de la Plataforma no se cuele nunca.
-$curado = & $Git ls-files --cached | Select-String -Pattern 'tarifas-excel\.json'
-if ($curado) { & $Git reset | Out-Null; Abortar 'tarifas-excel.json ha entrado en el indice' }
+$curado = @(Nativo $Git @('ls-files', '--cached') 'git ls-files' -Silencioso) |
+    Select-String -Pattern 'tarifas-excel\.json'
+if ($curado) {
+    Nativo $Git @('reset') 'git reset' -Silencioso | Out-Null
+    Abortar 'tarifas-excel.json ha entrado en el indice'
+}
 
 # 4. Publicar ---------------------------------------------------------------
 $fecha = Get-Date -Format 'yyyy-MM-dd'
-& $Git -c user.name='pacotegg' commit -q -m "Tarifas de la CNMC al $fecha
+$mensaje = @"
+Tarifas de la CNMC al $fecha
 
 Actualizacion automatica semanal.
 
-Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>"
-if ($LASTEXITCODE -ne 0) { Abortar "el commit fallo con codigo $LASTEXITCODE" }
-
-& $Git push origin main 2>&1 | ForEach-Object { Registro "  $_" }
-if ($LASTEXITCODE -ne 0) { Abortar "el push fallo con codigo $LASTEXITCODE" }
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+"@
+Nativo $Git @('-c', 'user.name=pacotegg', 'commit', '-q', '-m', $mensaje) 'el commit' | Out-Null
+Nativo $Git @('push', 'origin', 'main') 'el push' | Out-Null
 
 Registro 'publicado. GitHub Pages se reconstruye solo.'
 Registro '--- fin ---'
