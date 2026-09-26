@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
-import { ranking, type Consumo, type Constantes, type TarifaCalculable, type Resultado } from '@motor/motor.ts';
+import { ranking, rankingCNMC, type Consumo, type Constantes, type TarifaCalculable, type Resultado, type OfertaCNMC } from '@motor/motor.ts';
 import { leerPDF, type Resultado as Lectura } from './pdf.ts';
 import { Panel, Campo, Boton, Aviso, ZonaPDF, eur, kwh } from './componentes.tsx';
+import { ResultadosCNMC } from './resultados-cnmc.tsx';
 
 interface Datos {
   actualizadoExcel: string;
@@ -9,7 +10,11 @@ interface Datos {
   verificacion: { comparadas: number; divergencias: number };
   constantes: Constantes;
   tarifas: (TarifaCalculable & { ultimoCambio: string | null; nota: string | null; permanencia: string | null })[];
+  cnmc: { codigoPostal: string; verificadas: string; tarifas: OfertaCNMC[] } | null;
+  contraste: { tarifa: string; diferencia: number; ultimoCambioExcel: string | null }[];
 }
+
+type Fuente = 'excel' | 'cnmc';
 
 /** Repartos por defecto, sacados del post #3 y de la celda D34 del Excel. */
 const REPARTOS = [
@@ -27,6 +32,7 @@ export default function App() {
   const [cargando, setCargando] = useState(false);
   const [todas, setTodas] = useState(false);
   const [detalle, setDetalle] = useState<string | null>(null);
+  const [fuente, setFuente] = useState<Fuente>('excel');
 
   useEffect(() => {
     fetch('./tarifas.json')
@@ -40,6 +46,13 @@ export default function App() {
 
   const resultados = useMemo<Resultado[]>(
     () => (datos && listo ? ranking(datos.tarifas, consumo, datos.constantes) : []),
+    [datos, consumo, listo],
+  );
+
+  // Las de la CNMC se ordenan por el SEGUNDO ano: es lo que se paga cuando la
+  // promocion caduca. Ordenarlas por el primero premia a las ofertas gancho.
+  const resultadosCNMC = useMemo(
+    () => (datos?.cnmc && listo ? rankingCNMC(datos.cnmc.tarifas, consumo, 'segundo') : []),
     [datos, consumo, listo],
   );
 
@@ -151,6 +164,21 @@ export default function App() {
             </Panel>
           ) : (
             <>
+              <div className="flex gap-1.5 rounded-xl border border-[var(--color-borde)] bg-black/20 p-1">
+                {([['excel', 'Recomendadas', `${datos!.tarifas.length} del Excel`],
+                   ['cnmc', 'Todas', `${datos!.cnmc?.tarifas.length ?? 0} de la CNMC`]] as const).map(([k, t, sub]) => (
+                  <button key={k} onClick={() => setFuente(k)} disabled={k === 'cnmc' && !datos!.cnmc}
+                    className={`flex-1 rounded-lg px-3 py-2 text-sm transition disabled:opacity-30
+                      ${fuente === k ? 'bg-[var(--color-acento)] font-semibold text-slate-950' : 'text-[var(--color-tenue)] hover:text-[var(--color-tinta)]'}`}>
+                    {t}<span className={`ml-1.5 text-[11px] ${fuente === k ? 'text-slate-700' : ''}`}>{sub}</span>
+                  </button>
+                ))}
+              </div>
+
+              {fuente === 'cnmc' && datos!.cnmc ? (
+                <ResultadosCNMC res={resultadosCNMC} verificadas={datos!.cnmc.verificadas} excedentes={consumo.excedentes} />
+              ) : (
+              <>
               <Panel titulo="Las 5 más baratas para ti">
                 <ol className="space-y-2.5">
                   {resultados.slice(0, 5).map(r => {
@@ -235,6 +263,8 @@ export default function App() {
                   </ul>
                 )}
               </Panel>
+              </>
+              )}
             </>
           )}
         </div>

@@ -151,6 +151,62 @@ export function calcular(t: TarifaCalculable, c: Consumo, k: Constantes): Desglo
   };
 }
 
+// ---------------------------------------------------------------------------
+// Ofertas de la CNMC
+//
+// Vienen con los precios ya despejados del comparador oficial (ver
+// actualizador/src/cnmc.ts). Su modelo es distinto al del Excel: en vez de
+// reconstruir la factura concepto a concepto, traen la parte fija por dia y la
+// constante ya calculadas, con impuestos incluidos.
+//
+// NO modelan excedentes de autoconsumo: se comparan como si no hubiera placas.
+// Para excedentes vale el Excel.
+// ---------------------------------------------------------------------------
+
+/** El margen de potencia y energia arrastra impuesto electrico e IVA. */
+export const FACTOR_IMPUESTOS = (1 + 0.21) * (1 + 0.0511269632);
+
+export interface PreciosCNMC {
+  potPuntaDia: number; potValleDia: number;
+  ePunta: number; eLlano: number; eValle: number;
+  fijoDia: number; constante: number;
+}
+
+export function costeCNMC(p: PreciosCNMC, c: Consumo): number {
+  return p.constante
+    + p.fijoDia * c.dias
+    + FACTOR_IMPUESTOS * (
+      (p.potPuntaDia * c.potP1 + p.potValleDia * c.potP2) * c.dias
+      + p.ePunta * c.cPunta + p.eLlano * c.cLlano + p.eValle * c.cValle
+    );
+}
+
+export interface OfertaCNMC {
+  comercializadora: string; tarifa: string;
+  primerAnio: PreciosCNMC; segundoAnio: PreciosCNMC;
+  tienePromocion: boolean; soloNuevosClientes: boolean; penalizacion: boolean; verde: boolean;
+}
+
+export interface ResultadoCNMC extends OfertaCNMC {
+  costePrimerAnio: number; costeSegundoAnio: number; subida: number; puesto: number;
+}
+
+/**
+ * Ordena las ofertas de la CNMC. `por` decide que precio manda:
+ * 'segundo' es el honesto (lo que se paga cuando caduca la promocion).
+ */
+export function rankingCNMC(ofertas: OfertaCNMC[], c: Consumo, por: 'primero' | 'segundo' = 'segundo'): ResultadoCNMC[] {
+  const res = ofertas.map(o => {
+    const costePrimerAnio = costeCNMC(o.primerAnio, c);
+    const costeSegundoAnio = costeCNMC(o.segundoAnio, c);
+    return { ...o, costePrimerAnio, costeSegundoAnio, subida: costeSegundoAnio - costePrimerAnio, puesto: 0 };
+  }).filter(r => Number.isFinite(r.costeSegundoAnio) && r.costeSegundoAnio > 0);
+
+  res.sort((a, b) => (por === 'primero' ? a.costePrimerAnio - b.costePrimerAnio : a.costeSegundoAnio - b.costeSegundoAnio));
+  res.forEach((r, i) => { r.puesto = i + 1; });
+  return res;
+}
+
 export interface Resultado extends Desglose {
   comercializadora: string;
   tarifa: string;

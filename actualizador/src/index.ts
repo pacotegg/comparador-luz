@@ -106,13 +106,13 @@ async function main() {
       const m = cnmc.tarifas.find(c =>
         !c.sospechosa && norm(c.comercializadora).includes(marca) && norm(c.tarifa).includes(clave));
       if (!m) continue;
-      const dif = Math.abs(t.ePunta - m.ePunta);
+      const dif = Math.abs(t.ePunta - m.segundoAnio.ePunta);
       contraste.push({
         tarifa: `${t.comercializadora} ${t.tarifa}`, cnmc: `${m.comercializadora} ${m.tarifa}`,
-        ePuntaExcel: t.ePunta, ePuntaCNMC: m.ePunta, diferencia: dif,
+        ePuntaExcel: t.ePunta, ePuntaCNMC: m.segundoAnio.ePunta, diferencia: dif,
         ultimoCambioExcel: t.ultimoCambio,
       });
-      if (dif > 0.002) log(`  DISCREPAN ${t.comercializadora} ${t.tarifa}: Excel ${t.ePunta} vs CNMC ${m.ePunta.toFixed(6)} (Excel visto el ${t.ultimoCambio})`);
+      if (dif > 0.002) log(`  DISCREPAN ${t.comercializadora} ${t.tarifa}: Excel ${t.ePunta} vs CNMC ${m.segundoAnio.ePunta.toFixed(6)} (Excel visto el ${t.ultimoCambio})`);
     }
     log(`  ${contraste.length} tarifas presentes en las dos fuentes`);
   }
