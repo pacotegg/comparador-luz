@@ -3,6 +3,7 @@ import path from 'node:path';
 import { leerHilo } from './hilo.ts';
 import { descargar, recalcular, extraer } from './excel.ts';
 import { leerCNMC } from './cnmc.ts';
+import { contrastarExcedentes } from './excedentes.ts';
 import { ranking } from '../../motor/motor.ts';
 
 /**
@@ -132,6 +133,25 @@ async function main() {
     log(`  ${contraste.length} tarifas presentes en las dos fuentes`);
   }
 
+  // Contraste de excedentes: mira la web oficial de cada tarifa y avisa si no
+  // dice lo que dice el Excel. No corrige nada: la compensacion es un atributo
+  // de la tarifa y una web lista varias, asi que el numero puede ser de otro
+  // producto. Por eso se guarda la evidencia textual y decide el humano.
+  log('Contrastando excedentes contra las webs oficiales...');
+  let excedentes: Awaited<ReturnType<typeof contrastarExcedentes>> = [];
+  try {
+    excedentes = await contrastarExcedentes(datos.tarifas as any, hilo.html);
+    const conDato = excedentes.filter(e => e.cuadra !== null);
+    const discrepan = conDato.filter(e => !e.cuadra);
+    log(`  ${conDato.length}/${excedentes.length} tarifas con precio en su web, ${conDato.length - discrepan.length} coinciden`);
+    for (const d of discrepan) {
+      log(`  REVISAR ${d.comercializadora} ${d.tarifa}: web ${d.precio} vs Excel ${d.excel}`);
+      log(`     "${d.evidencia}"  (${d.url})`);
+    }
+  } catch (e: any) {
+    log(`  no he podido contrastar (${e.message})`);
+  }
+
   await fs.mkdir(path.join(RAIZ, 'datos'), { recursive: true });
   await fs.mkdir(PUBLIC, { recursive: true });
 
@@ -160,6 +180,7 @@ async function main() {
     constantes: datos.constantes,
     tarifas: datos.tarifas,
     contraste,
+    contrasteExcedentes: excedentes,
   });
   log(`Escrito ${SALIDA_EXCEL} (local, fuera de git)`);
 }

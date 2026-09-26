@@ -6,6 +6,8 @@ export const URL_HILO = 'https://forocoches.com/foro/showthread.php?t=10802238';
 const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0 Safari/537.36';
 
 export interface Hilo {
+  /** El HTML del hilo, que lleva tambien la URL oficial de cada tarifa. */
+  html: string;
   urlExcel: string;
   titulo: string;
   volumen: string | null;
@@ -37,5 +39,5 @@ export async function leerHilo(url = URL_HILO): Promise<Hilo> {
   let aviso: string | null = null;
   if (/cerrado|closed/i.test(titulo)) aviso = 'El hilo parece cerrado.';
 
-  return { urlExcel, titulo, volumen, aviso };
+  return { html, urlExcel, titulo, volumen, aviso };
 }
