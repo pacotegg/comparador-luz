@@ -2,6 +2,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { leerHilo } from './hilo.ts';
 import { descargar, recalcular, extraer } from './excel.ts';
+import { leerCNMC } from './cnmc.ts';
 import { ranking } from '../../motor/motor.ts';
 
 /**
@@ -67,6 +68,55 @@ async function main() {
     log(cambios ? `  ${cambios} cambios` : '  sin cambios respecto a la semana pasada');
   }
 
+  // Segunda fuente: el comparador oficial de la CNMC, al que lleva el QR de las
+  // facturas. Trae muchas mas ofertas y, sobre todo, el precio del segundo ano,
+  // que es el que se paga cuando se acaban las promociones.
+  log('Consultando la CNMC...');
+  let cnmc: Awaited<ReturnType<typeof leerCNMC>> | null = null;
+  try {
+    cnmc = await leerCNMC();
+    log(`  ${cnmc.total} ofertas, precios despejados y verificados en ${cnmc.cuadran}`);
+    if (cnmc.descuadre.length) log(`  AVISO: ${cnmc.descuadre.join('; ')}`);
+  } catch (e: any) {
+    log(`  no he podido leer la CNMC (${e.message}). Sigo solo con el Excel.`);
+  }
+
+  // Donde las dos fuentes hablan de la misma tarifa, comparar. Si discrepan, o
+  // el Excel esta desactualizado o la comercializadora publica dos precios.
+  const contraste: any[] = [];
+  if (cnmc) {
+    const norm = (s: string) => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]/g, '');
+
+    // La CNMC usa razones sociales y el Excel nombres comerciales, asi que hace
+    // falta una tabla. Sin comparar tambien la comercializadora, "REPSOL Sin
+    // horarios" casa con "ENERGIA NUFRI - SIN HORARIOS" y el contraste miente.
+    const ALIAS: Record<string, string> = {
+      chc: 'cidehcenergia', niba: 'niba', imagina: 'imaginaenergia',
+      energianufri: 'energianufrisl', repsol: 'repsolcomercializadora',
+      naturgy: 'naturgyclientes', endesa: 'endesa',
+      comercializadorasdereferencia: 'comercializadoradereferencia',
+    };
+
+    for (const t of datos.tarifas) {
+      if (t.ePunta == null) continue;
+      const marca = ALIAS[norm(t.comercializadora)];
+      if (!marca) continue;                       // no esta en la CNMC, nada que contrastar
+      const clave = norm(t.tarifa).slice(0, 10);
+      if (clave.length < 6) continue;
+      const m = cnmc.tarifas.find(c =>
+        !c.sospechosa && norm(c.comercializadora).includes(marca) && norm(c.tarifa).includes(clave));
+      if (!m) continue;
+      const dif = Math.abs(t.ePunta - m.ePunta);
+      contraste.push({
+        tarifa: `${t.comercializadora} ${t.tarifa}`, cnmc: `${m.comercializadora} ${m.tarifa}`,
+        ePuntaExcel: t.ePunta, ePuntaCNMC: m.ePunta, diferencia: dif,
+        ultimoCambioExcel: t.ultimoCambio,
+      });
+      if (dif > 0.002) log(`  DISCREPAN ${t.comercializadora} ${t.tarifa}: Excel ${t.ePunta} vs CNMC ${m.ePunta.toFixed(6)} (Excel visto el ${t.ultimoCambio})`);
+    }
+    log(`  ${contraste.length} tarifas presentes en las dos fuentes`);
+  }
+
   await fs.mkdir(path.dirname(SALIDA), { recursive: true });
   await fs.writeFile(SALIDA, JSON.stringify({
     generado: datos.generado,
@@ -75,6 +125,12 @@ async function main() {
     verificacion: { comparadas: res.length, divergencias: fallos.length },
     constantes: datos.constantes,
     tarifas: datos.tarifas,
+    cnmc: cnmc && {
+      codigoPostal: cnmc.codigoPostal,
+      verificadas: `${cnmc.cuadran}/${cnmc.total}`,
+      tarifas: cnmc.tarifas.filter(t => !t.sospechosa),
+    },
+    contraste,
   }, null, 2));
   log(`Escrito ${SALIDA}`);
 }
