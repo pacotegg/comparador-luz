@@ -2,9 +2,11 @@
   "name": "luzapp",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "actualizar": "node actualizador/src/index.ts",
+    "dev": "npm run dev -w app",
+    "build": "npm run build -w app",
+    "preview": "npm run preview -w app"
   },
   "keywords": [],
   "author": "",
@@ -15,5 +17,12 @@
     "fflate": "^0.8.3",
     "jsqr": "^1.4.0",
     "pdfjs-dist": "^6.3.289"
+  },
+  "private": true,
+  "workspaces": [
+    "app"
+  ],
+  "allowScripts": {
+    "esbuild@0.25.12": true
   }
 }

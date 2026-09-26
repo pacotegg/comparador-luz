@@ -48,6 +48,13 @@ const num = (v: any): number | null => {
   const n = typeof v === 'object' && v !== null ? (v.result ?? v.value) : v;
   return typeof n === 'number' && Number.isFinite(n) ? n : null;
 };
+/** Fecha en aaaa-mm-dd, venga suelta o envuelta en una formula. */
+const fecha = (v: any): string | null => {
+  const d = v instanceof Date ? v : (typeof v === 'object' && v?.result instanceof Date ? v.result : null);
+  if (!d) return txt(v);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+};
+
 const txt = (v: any): string | null => {
   const s = typeof v === 'object' && v !== null ? (v.result ?? v.text ?? v.value) : v;
   if (s === null || s === undefined) return null;
@@ -103,7 +110,7 @@ export async function extraer(xlsx: string) {
     excedentes: num(c(`${col}17`)),
     tipoCompensacion: txt(c(`${col}18`)),
     bateriaVirtual: num(c(`${col}19`)),
-    ultimoCambio: (() => { const v: any = c(`${col}20`); return v instanceof Date ? v.toISOString().slice(0,10) : txt(v); })(),
+    ultimoCambio: fecha(c(`${col}20`)),
     nota: [txt(c(`${col}21`)), txt(c(`${col}22`))].filter(Boolean).join(' | ') || null,
     limiteConsumo: txt(c(`${col}23`)),
     descuentoDia: descuentoDia(c(`${col}56`)),
@@ -112,7 +119,7 @@ export async function extraer(xlsx: string) {
 
   return {
     generado: new Date().toISOString(),
-    actualizadoExcel: (() => { const v: any = c('B1'); return v instanceof Date ? v.toISOString().slice(0,10) : txt(v); })(),
+    actualizadoExcel: fecha(c('B1')),
     // Constantes reguladas, con los nombres definidos del propio libro
     constantes: {
       finbonsoc: num(c('C49')), IEact: num(c('C50')), contadordia: num(c('C51')), IVAact: num(c('C54')),

@@ -1,0 +1,25 @@
+@import "tailwindcss";
+
+@theme {
+  --color-fondo: #0b1120;
+  --color-panel: #111c34;
+  --color-borde: #23304d;
+  --color-tinta: #e8eefc;
+  --color-tenue: #93a3c2;
+  --color-acento: #38bdf8;
+  --color-bien: #34d399;
+  --color-aviso: #fbbf24;
+}
+
+html, body, #root { height: 100%; }
+body {
+  background: var(--color-fondo);
+  color: var(--color-tinta);
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Quitar las flechitas de los number: en el movil estorban mas que ayudan */
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button { appearance: none; margin: 0; }
+input[type=number] { appearance: textfield; }
