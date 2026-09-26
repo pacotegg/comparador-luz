@@ -21,3 +21,6 @@ app/public/tarifas-excel.json
 # Ficheros de la etapa anterior, cuando las dos fuentes iban juntas
 datos/tarifas.json
 app/public/tarifas.json
+
+# Log de la tarea semanal
+actualizar-semanal.log
