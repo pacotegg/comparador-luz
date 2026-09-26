@@ -9,6 +9,10 @@
 
 $ErrorActionPreference = 'Stop'
 
+# node escribe en UTF-8; sin esto el log guarda "Ôé¼" donde deberia poner "€".
+[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+$OutputEncoding = [System.Text.Encoding]::UTF8
+
 $Node = 'C:\Program Files\nodejs\node.exe'
 $Git  = 'C:\Program Files\Git\cmd\git.exe'
 $Raiz = 'C:\luzapp'
