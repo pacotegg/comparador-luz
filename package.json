@@ -1,0 +1,19 @@
+{
+  "name": "luzapp",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "exceljs": "^4.4.0",
+    "fflate": "^0.8.3",
+    "jsqr": "^1.4.0",
+    "pdfjs-dist": "^6.3.289"
+  }
+}

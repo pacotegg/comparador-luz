@@ -1,0 +1,14 @@
+# Facturas reales: llevan CUPS, nombre, direccion y cuenta bancaria.
+# Este repo es publico. NUNCA entran en git.
+facturas-prueba/
+*.pdf
+
+# Descargas y trabajo del actualizador
+descargas/
+tmp/
+
+node_modules/
+dist/
+
+# Volcados de sondeo: llevan el texto de las facturas (nombre, direccion, CUPS).
+sondeo/
