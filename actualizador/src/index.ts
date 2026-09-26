@@ -155,24 +155,34 @@ async function main() {
   await fs.mkdir(path.join(RAIZ, 'datos'), { recursive: true });
   await fs.mkdir(PUBLIC, { recursive: true });
 
-  const escribir = async (destino: string, copia: string, contenido: unknown) => {
+  // Solo se reescribe si cambia algo de verdad. Si no, el campo `generado` (una
+  // marca de tiempo) haria que el fichero pareciera distinto en cada pasada y la
+  // tarea semanal publicaria un commit de ruido aunque las tarifas sean iguales.
+  const escribir = async (destino: string, copia: string, contenido: any) => {
     const txt = JSON.stringify(contenido, null, 2);
+    const sinFecha = (t: string) => t.replace(/^\s*"generado":.*$/m, '');
+    const previo = await fs.readFile(destino, 'utf8').catch(() => null);
+    if (previo !== null && sinFecha(previo) === sinFecha(txt)) {
+      log(`  ${path.basename(destino)} sin cambios, no se reescribe`);
+      return false;
+    }
     await fs.writeFile(destino, txt);
     await fs.writeFile(path.join(PUBLIC, copia), txt);
+    return true;
   };
 
   if (cnmc) {
-    await escribir(SALIDA_CNMC, 'tarifas-cnmc.json', {
+    const cambio = await escribir(SALIDA_CNMC, 'tarifas-cnmc.json', {
       generado: datos.generado,
       fuente: 'Comparador oficial de ofertas de la CNMC',
       codigoPostal: cnmc.codigoPostal,
       verificadas: `${cnmc.cuadran}/${cnmc.total}`,
       tarifas: cnmc.tarifas.filter(t => !t.sospechosa),
     });
-    log(`Escrito ${SALIDA_CNMC}`);
+    if (cambio) log(`Escrito ${SALIDA_CNMC}`);
   }
 
-  await escribir(SALIDA_EXCEL, 'tarifas-excel.json', {
+  const cambioExcel = await escribir(SALIDA_EXCEL, 'tarifas-excel.json', {
     generado: datos.generado,
     actualizadoExcel: datos.actualizadoExcel,
     fuente: { hilo: hilo.titulo, volumen: hilo.volumen, excel: hilo.urlExcel },
@@ -182,7 +192,7 @@ async function main() {
     contraste,
     contrasteExcedentes: excedentes,
   });
-  log(`Escrito ${SALIDA_EXCEL} (local, fuera de git)`);
+  if (cambioExcel) log(`Escrito ${SALIDA_EXCEL} (local, fuera de git)`);
 }
 
 main().catch(e => { console.error('FALLO:', e.message); process.exit(1); });
