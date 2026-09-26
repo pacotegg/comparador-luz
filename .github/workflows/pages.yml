@@ -1,0 +1,63 @@
+name: Publicar en GitHub Pages
+
+# Se construye AQUI, desde el repo, nunca subiendo un dist hecho en local: el
+# dist local contiene tarifas-excel.json, que es justo lo que no se republica.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  construir:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Comprobar que no se cuela el dataset curado
+        run: |
+          if [ -f datos/tarifas-excel.json ] || [ -f app/public/tarifas-excel.json ]; then
+            echo "El dataset del Excel esta en el repo y no deberia estarlo."
+            exit 1
+          fi
+          echo "Limpio: solo se publica tarifas-cnmc.json"
+
+      - run: npm run build
+
+      - name: Y que tampoco esta en el build
+        run: |
+          if [ -f app/dist/tarifas-excel.json ]; then
+            echo "El build contiene el dataset del Excel."
+            exit 1
+          fi
+          ls -la app/dist
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: app/dist
+
+  publicar:
+    needs: construir
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - id: deploy
+        uses: actions/deploy-pages@v4
