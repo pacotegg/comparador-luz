@@ -1,0 +1,8 @@
+{
+  "appId": "es.pacotegg.comparadorluz",
+  "appName": "Comparador de luz",
+  "webDir": "dist",
+  "android": {
+    "allowMixedContent": false
+  }
+}

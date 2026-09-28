@@ -24,3 +24,14 @@ app/public/tarifas.json
 
 # Log de la tarea semanal
 actualizar-semanal.log
+
+# Proyecto Android que genera Capacitor (npx cap add android)
+app/android/
+
+# Claves de firma: nunca en git
+*.keystore
+*.jks
+keystore.properties
+
+# APK generados
+*.apk
