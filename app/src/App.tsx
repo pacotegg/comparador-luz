@@ -3,10 +3,13 @@ import { ranking, rankingCNMC, type Consumo, type Constantes, type TarifaCalcula
 import { leerPDF, type Resultado as Lectura } from './pdf.ts';
 import { Panel, Campo, Boton, Aviso, ZonaPDF, eur, kwh } from './componentes.tsx';
 import { ResultadosCNMC } from './resultados-cnmc.tsx';
+import { actualizarRecomendadas, guardadas, esApp, type Resultado as ResActualizar } from './actualizar-recomendadas.ts';
 
 /** Datos del comparador oficial. Siempre presentes: van en el repo publico. */
 interface DatosCNMC {
   generado: string;
+  /** Enlace publico al Excel del hilo, para que el APK lo refresque solo. */
+  excelDelHilo?: string;
   verificadas: string;
   tarifas: OfertaCNMC[];
 }
@@ -55,6 +58,8 @@ export default function App() {
   // que se pida a proposito.
   const [verAunqueNoAplique, setVerAunqueNoAplique] = useState(false);
   const [fuente, setFuente] = useState<Fuente>('cnmc');
+  const [refrescando, setRefrescando] = useState(false);
+  const [avisoRefresco, setAvisoRefresco] = useState<ResActualizar | null>(null);
 
   useEffect(() => {
     /**
@@ -71,9 +76,8 @@ export default function App() {
     // Solo el APK va a buscarlos fuera. La web ya sirve su propia copia, que se
     // renueva en cada despliegue; si tirase de la publicada, en desarrollo
     // taparia los cambios locales y ademas pediria dos veces lo mismo.
-    const esApp = typeof (window as any).Capacitor !== 'undefined';
     const cargar = async (nombre: string) => {
-      const donde = esApp ? [`${PUBLICADO}/${nombre}`, `./${nombre}`] : [`./${nombre}`];
+      const donde = esApp() ? [`${PUBLICADO}/${nombre}`, `./${nombre}`] : [`./${nombre}`];
       for (const url of donde) {
         try {
           const r = await fetch(url, { cache: 'no-cache' });
@@ -86,10 +90,15 @@ export default function App() {
     cargar('tarifas-cnmc.json')
       .then(d => { if (d) setCnmc(d); else setError('No he podido cargar las ofertas de la CNMC.'); });
 
+    // Si el Excel del hilo ya se descargo alguna vez, eso manda sobre la copia
+    // que viene dentro del paquete, que envejece desde el dia que se compilo.
+    const bajadas = guardadas();
+    if (bajadas) { setExcel(bajadas as any); setFuente('excel'); }
+
     // Opcional a proposito: en el despliegue publico este fichero no existe.
     fetch('./tarifas-excel.json')
       .then(r => (r.ok ? r.json() : null))
-      .then(d => { if (d) { setExcel(d); setFuente('excel'); } })
+      .then(d => { if (d && !bajadas) { setExcel(d); setFuente('excel'); } })
       .catch(() => { /* sin Excel se trabaja solo con la CNMC */ });
   }, []);
 
@@ -334,9 +343,38 @@ export default function App() {
                   {excel && `Motor verificado contra el Excel: ${excel.verificacion.comparadas - excel.verificacion.divergencias}/${excel.verificacion.comparadas}.`}
                 </>
               }>
-                <Boton tipo="suave" onClick={() => setTodas(t => !t)}>
-                  {todas ? 'Ocultar' : `Ver las ${resultados.length} tarifas`}
-                </Boton>
+                <div className="flex flex-wrap items-center gap-2">
+                  <Boton tipo="suave" onClick={() => setTodas(t => !t)}>
+                    {todas ? 'Ocultar' : `Ver las ${resultados.length} tarifas`}
+                  </Boton>
+
+                  {/* Solo en el APK: en la web estos datos se renuevan con el
+                      despliegue, y ademas Dropbox no deja pedirlo desde un
+                      navegador (no manda cabecera CORS). */}
+                  {esApp() && cnmc?.excelDelHilo && (
+                    <Boton tipo="suave" disabled={refrescando} onClick={async () => {
+                      setRefrescando(true); setAvisoRefresco(null);
+                      const r = await actualizarRecomendadas(cnmc.excelDelHilo!, excel?.tarifas);
+                      if (r.estado !== 'error') setExcel(r.datos as any);
+                      setAvisoRefresco(r);
+                      setRefrescando(false);
+                    }}>
+                      {refrescando ? 'Descargando…' : 'Buscar tarifas nuevas'}
+                    </Boton>
+                  )}
+                </div>
+
+                {avisoRefresco && (
+                  <div className="mt-3">
+                    <Aviso tono={avisoRefresco.estado === 'error' ? 'aviso' : 'bien'}>
+                      {avisoRefresco.estado === 'actualizado'
+                        ? `Actualizadas: han cambiado ${avisoRefresco.cambios} tarifa${avisoRefresco.cambios === 1 ? '' : 's'} respecto a las que tenías.`
+                        : avisoRefresco.estado === 'sin cambios'
+                        ? 'Ya estaban al día: no hay nada nuevo que descargar.'
+                        : `No he podido actualizarlas: ${avisoRefresco.motivo}.`}
+                    </Aviso>
+                  </div>
+                )}
                 {todas && (
                   <ul className="mt-3 space-y-1 text-sm">
                     {resultados.slice(5).map(r => (

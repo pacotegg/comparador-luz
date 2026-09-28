@@ -183,6 +183,11 @@ async function main() {
     const cambio = await escribir(SALIDA_CNMC, 'tarifas-cnmc.json', {
       generado: datos.generado,
       fuente: 'Comparador oficial de ofertas de la CNMC',
+      // El ENLACE al Excel del hilo, no su contenido. Es un enlace publico que
+      // la Plataforma reparte en el post #3 y que pide que todo el mundo se
+      // descargue; publicarlo no republica su trabajo. Lo usa el APK para
+      // refrescar por su cuenta las tarifas recomendadas, que no se publican.
+      excelDelHilo: hilo.urlExcel,
       codigoPostal: cnmc.codigoPostal,
       verificadas: `${cnmc.cuadran}/${cnmc.total}`,
       tarifas: cnmc.tarifas.filter(t => !t.sospechosa),
