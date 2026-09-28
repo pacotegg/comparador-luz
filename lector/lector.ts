@@ -30,6 +30,12 @@ export interface Resultado {
   /** Como se leyo cada campo del texto, para poder auditarlo. */
   patrones: Partial<Record<keyof Campos, string>>;
   potenciaMaxima: number | null;
+  /**
+   * Consumo total cuando la factura NO desglosa por periodos (tarifas de un
+   * solo precio, como la Por Uso Luz de Naturgy). Sin reparto no se puede
+   * comparar: la app tiene que ofrecer uno de los repartos por defecto.
+   */
+  consumoTotalSinDesglose: number | null;
   potenciaSugerida: number | null;
   totalFactura: number | null;
   cups: string | null;
@@ -105,6 +111,9 @@ export async function leerFactura(doc: any, OPS: any): Promise<Resultado> {
   return {
     campos, origen, patrones,
     potenciaMaxima, potenciaSugerida,
+    consumoTotalSinDesglose:
+      campos.cPunta === null && campos.cLlano === null && campos.cValle === null
+        ? (t.consumoTotal?.valor ?? null) : null,
     totalFactura: qr?.totalFactura ?? t.totalFactura?.valor ?? null,
     cups: qr?.cups ?? null,
     tieneQR: qr !== null,

@@ -16,6 +16,8 @@ export interface Lectura {
   cLlano: Campo<number> | null;
   cValle: Campo<number> | null;
   excedentes: Campo<number> | null;
+  /** Solo lo rellenan las tarifas de un periodo, que no desglosan punta/llano/valle. */
+  consumoTotal: Campo<number> | null;
   precioExcedente: Campo<number> | null;
   totalFactura: Campo<number> | null;
   avisos: string[];
@@ -34,8 +36,31 @@ function buscar(txt: string, patrones: [string, RegExp][]): Campo<number> | null
   return null;
 }
 
-export function leerTexto(txt: string): Lectura {
+/**
+ * Recorta el texto a la parte de ELECTRICIDAD cuando la factura trae tambien gas.
+ *
+ * Medido sobre una factura de Naturgy (28/09/2026): la seccion de gas va primero
+ * y tiene sus propios dias y su propio "Alquiler de contador". Sin recortar, el
+ * lector devolvia 125 dias —los del gas— en vez de los 30 de la luz. Y sin
+ * avisar de nada, que es lo peor: un numero plausible y equivocado multiplica la
+ * factura por cuatro.
+ */
+function soloElectricidad(txt: string): { texto: string; recortado: boolean } {
+  const inicio = txt.search(/consumo\s+electricidad|tarifa\s+por\s+uso\s+luz|detalle\s+de\s+la\s+factura\s+de\s+electricidad/i);
+  const hayGas = /total\s+gas|consumo\s+gas|tarifa\s+\w*\s*gas/i.test(txt);
+  if (inicio < 0 || !hayGas) return { texto: txt, recortado: false };
+
+  const resto = txt.slice(inicio);
+  const fin = resto.search(/base\s+imponible|total\s+a\s+pagar/i);
+  return { texto: fin > 0 ? resto.slice(0, fin) : resto, recortado: true };
+}
+
+export function leerTexto(textoCompleto: string): Lectura {
   const avisos: string[] = [];
+  const { texto: txt, recortado } = soloElectricidad(textoCompleto);
+  if (recortado) {
+    avisos.push('Es una factura de gas y electricidad: solo se han leido los datos de la parte electrica.');
+  }
 
   // --- Dias -------------------------------------------------------------
   // El "x NN Dias" del detalle es mas fiable que la cabecera: en la Nufri la
@@ -44,10 +69,17 @@ export function leerTexto(txt: string): Lectura {
   // sola vez por el periodo entero. El "x NN Dias" del detalle va despues: cuando
   // la compania parte el periodo porque cambio de precios a mitad (Iberdrola lo
   // hace), ese patron devuelve solo el primer tramo. Medido: 25 en vez de 31.
+  // "(32 dias)" del periodo de facturacion (Endesa) es lo mas explicito que hay:
+  // lo dice la propia compania y no depende de ninguna linea del detalle.
+  //
+  // Y los dias pueden venir con decimales: Naturgy escribe "30,00 dias" en la
+  // linea del bono social, asi que el numero no puede ser solo digitos.
   let dias = buscar(txt, [
-    ['bono social "NN dias"', new RegExp(String.raw`[Bb]ono\s+social[^\n]*?(\d{1,3})\s*d[ií]as`)],
-    ['contador "NN dias"', new RegExp(String.raw`[Aa]lquiler[^\n]*?(\d{1,3})\s*d[ií]as`)],
+    ['"(NN dias)" del periodo', new RegExp(String.raw`\(\s*(\d{1,3})\s*d[ií]as\s*\)`, 'i')],
+    ['bono social "NN dias"', new RegExp(String.raw`[Bb]ono\s+[Ss]ocial[^\n]*?${N}\s*d[ií]as`)],
+    ['contador "NN dias"', new RegExp(String.raw`[Aa]lquiler[^\n]*?${N}\s*d[ií]as`)],
     ['detalle "x NN Dias"', new RegExp(String.raw`x\s*(\d{1,3})\s*[Dd][ií]as`)],
+    ['"NN dias" del contrato', new RegExp(String.raw`[Cc]ontrato\s*:?\s*(\d{1,3})\s*d[ií]as`)],
   ]);
 
   // Si el detalle esta partido en tramos, los tramos tienen que sumar el periodo.
@@ -80,10 +112,18 @@ export function leerTexto(txt: string): Lectura {
   const kW = String.raw`\s*kW(?!h)`;
   const potP1 = buscar(txt, [
     ['"Potencia punta: N kW"', new RegExp(String.raw`Potencia\s+punta\s*:?\s*${N}${kW}`, 'i')],
+    // Endesa: "Potencias contratadas: punta 3,450 kW; valle 3,450 kW"
+    ['"contratadas: punta N kW" (Endesa)', new RegExp(String.raw`contratadas\s*:?\s*punta\s*${N}${kW}`, 'i')],
+    ['"Pot.Punta N kW" (Endesa)', new RegExp(String.raw`Pot\.?\s*Punta\s+${N}${kW}`, 'i')],
+    // Naturgy: "Termino de potencia P1 (4,400 kW)" — el kW va DENTRO del parentesis
+    ['"potencia P1 (N kW)" (Naturgy)', new RegExp(String.raw`potencia\s+P1\s*\(\s*${N}${kW}`, 'i')],
     ['"P1 N kW"', new RegExp(String.raw`\bP1\s+${N}${kW}`)],
   ]);
   const potP2 = buscar(txt, [
     ['"Potencia valle: N kW"', new RegExp(String.raw`Potencia\s+valle\s*:?\s*${N}${kW}`, 'i')],
+    ['"; valle N kW" (Endesa)', new RegExp(String.raw`contratadas[^\n]*?valle\s*${N}${kW}`, 'i')],
+    ['"Pot.Valle N kW" (Endesa)', new RegExp(String.raw`Pot\.?\s*Valle\s+${N}${kW}`, 'i')],
+    ['"potencia P2 (N kW)" (Naturgy)', new RegExp(String.raw`potencia\s+P2\s*\(\s*${N}${kW}`, 'i')],
     ['"P2 N kW"', new RegExp(String.raw`\bP2\s+${N}${kW}`)],
     ['"P3 N kW" (Nufri)', new RegExp(String.raw`\bP3\s+${N}${kW}`)],
   ]);
@@ -92,17 +132,37 @@ export function leerTexto(txt: string): Lectura {
   // TRAMPA: Iberdrola trae DOS juegos. El bueno es el resumen "Punta: N kWh".
   // El otro ("Sus consumos desagregados han sido punta: ...") es la lectura
   // estimada del contador y difiere: 203,06 frente a 226,73 en una factura real.
+  //
+  // Endesa no pone los periodos en el detalle —su tarifa Tempo Happy factura por
+  // "horas Happy", "promocion" y "resto"— pero si trae la tabla de peajes y
+  // cargos, que es la de verdad: "Punta 13.437 13.557 1 0 120", donde el ultimo
+  // numero es el consumo. Es lo unico de esa factura que sirve para comparar.
+  const tablaATR = (periodo: string) =>
+    new RegExp(String.raw`\b${periodo}\s+[\d.,]+\s+[\d.,]+\s+\d+\s+\d+\s+${N}`, 'i');
+
   const cPunta = buscar(txt, [
     ['resumen "Punta: N kWh"', new RegExp(String.raw`(?<!desagregados[^\n]{0,80})\bPunta:\s*${N}\s*kWh`)],
     ['detalle "P1 N kWh x"', new RegExp(String.raw`\bP1\s+${N}\s*kWh\s*x`)],
+    ['tabla de peajes (Endesa)', tablaATR('Punta')],
   ]);
   const cLlano = buscar(txt, [
     ['resumen "Llano: N kWh"', new RegExp(String.raw`(?<!desagregados[^\n]{0,80})\bLlano:\s*${N}\s*kWh`)],
     ['detalle "P2 N kWh x"', new RegExp(String.raw`\bP2\s+${N}\s*kWh\s*x`)],
+    ['tabla de peajes (Endesa)', tablaATR('Llano')],
   ]);
   const cValle = buscar(txt, [
     ['resumen "Valle: N kWh"', new RegExp(String.raw`(?<!desagregados[^\n]{0,80})\bValle:?\s*${N}\s*kWh`)],
     ['detalle "P3 N kWh x"', new RegExp(String.raw`\bP3\s+${N}\s*kWh\s*x`)],
+    ['tabla de peajes (Endesa)', tablaATR('Valle')],
+  ]);
+
+  // Consumo total, para las tarifas de un solo periodo que no desglosan nada
+  // (Naturgy Por Uso Luz: "Consumo electricidad 64 kWh"). Sin el reparto, la app
+  // no puede comparar: hay que ofrecerle al usuario uno de los repartos por
+  // defecto del post #3.
+  const consumoTotal = buscar(txt, [
+    ['"Consumo electricidad N kWh"', new RegExp(String.raw`Consumo\s+electricidad\s+${N}\s*kWh`, 'i')],
+    ['"Consumo total N kWh"', new RegExp(String.raw`Consumo\s+total\s+${N}\s*kWh`, 'i')],
   ]);
 
   // --- Excedentes de autoconsumo ---------------------------------------
@@ -136,5 +196,5 @@ export function leerTexto(txt: string): Lectura {
     if (!c) avisos.push(`No he sabido leer: ${nombre}. Hay que meterlo a mano.`);
   }
 
-  return { dias, potP1, potP2, cPunta, cLlano, cValle, excedentes, precioExcedente, totalFactura, avisos };
+  return { dias, potP1, potP2, cPunta, cLlano, cValle, excedentes, consumoTotal, precioExcedente, totalFactura, avisos };
 }

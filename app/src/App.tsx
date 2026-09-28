@@ -79,13 +79,23 @@ export default function App() {
     try {
       const r = await leerPDF(f);
       setLectura(r);
+      // Si la tarifa es de un solo precio, la factura no desglosa por periodos:
+      // solo da el total. Se reparte con el 25/25/50 que recomienda el post #3 y
+      // se avisa, porque es una estimacion nuestra y no un dato de la factura.
+      const sinDesglose = r.consumoTotalSinDesglose;
+      const reparto = sinDesglose ? {
+        cPunta: +(sinDesglose * 0.25).toFixed(2),
+        cLlano: +(sinDesglose * 0.25).toFixed(2),
+        cValle: +(sinDesglose * 0.50).toFixed(2),
+      } : null;
+
       setConsumo(c => ({
         dias: r.campos.dias ?? c.dias,
         potP1: r.campos.potP1 ?? c.potP1,
         potP2: r.campos.potP2 ?? c.potP2,
-        cPunta: r.campos.cPunta ?? c.cPunta,
-        cLlano: r.campos.cLlano ?? c.cLlano,
-        cValle: r.campos.cValle ?? c.cValle,
+        cPunta: r.campos.cPunta ?? reparto?.cPunta ?? c.cPunta,
+        cLlano: r.campos.cLlano ?? reparto?.cLlano ?? c.cLlano,
+        cValle: r.campos.cValle ?? reparto?.cValle ?? c.cValle,
         excedentes: r.campos.excedentes ?? c.excedentes,
       }));
     } catch (e: any) {
@@ -132,6 +142,15 @@ export default function App() {
                     Tu punto máximo del año fue {lectura.potenciaMaxima} kW. El post #2 recomienda
                     dividirlo entre 1,2: te bastaría con <strong>{lectura.potenciaSugerida} kW</strong>.
                     Bajar 1 kW son unos 55 € al año.
+                  </Aviso>
+                )}
+                {lectura.consumoTotalSinDesglose && (
+                  <Aviso>
+                    Tu tarifa es de un solo precio, así que la factura no dice cuánto
+                    gastaste en cada periodo: solo el total, {lectura.consumoTotalSinDesglose} kWh.
+                    Lo he repartido 25 / 25 / 50 como recomienda el post #3, pero{' '}
+                    <strong>es una estimación mía, no un dato tuyo</strong>. Si tu
+                    distribuidora te da el desglose real, mételo a mano.
                   </Aviso>
                 )}
                 {lectura.avisos.map((a, i) => <Aviso key={i}>{a}</Aviso>)}
