@@ -44,3 +44,6 @@ datos/*.json
 !datos/tarifas-cnmc.json
 app/public/*.json
 !app/public/tarifas-cnmc.json
+
+# Entregables y capturas de prueba
+entregas/
