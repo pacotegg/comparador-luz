@@ -157,7 +157,7 @@ export default function App() {
   const org = (k: keyof Consumo) => lectura?.origen[k as never] ?? null;
 
   return (
-    <div className="mx-auto min-h-full max-w-5xl px-4 py-6 sm:px-6 sm:py-10">
+    <div className="pagina mx-auto min-h-full max-w-5xl px-4 py-6 sm:px-6 sm:py-10">
       <header className="mb-7">
         <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Comparador de luz</h1>
         <p className="mt-1.5 text-sm text-[var(--color-tenue)]">

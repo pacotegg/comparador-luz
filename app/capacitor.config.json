@@ -2,7 +2,13 @@
   "appId": "es.pacotegg.comparadorluz",
   "appName": "Comparador de luz",
   "webDir": "dist",
+  "backgroundColor": "#0b1120",
   "android": {
     "allowMixedContent": false
+  },
+  "plugins": {
+    "SystemBars": {
+      "style": "DARK"
+    }
   }
 }
