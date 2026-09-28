@@ -37,20 +37,20 @@ export function ResultadosCNMC({ res, verificadas, excedentes }: { res: Resultad
                 ? 'border-emerald-400/50 bg-emerald-400/10' : 'border-[var(--color-borde)] bg-black/15'}`}>
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
-                  <div className="flex items-center gap-2">
+                  <div className="flex min-w-0 items-center gap-2">
                     <span className={`grid size-5 shrink-0 place-items-center rounded-full text-[11px] font-bold
                       ${r.puesto === 1 ? 'bg-emerald-400 text-slate-950' : 'bg-[var(--color-borde)]'}`}>{r.puesto}</span>
                     <span className="truncate font-semibold">{r.comercializadora}</span>
                   </div>
                   <p className="mt-0.5 truncate text-xs text-[var(--color-tenue)]">{r.tarifa}</p>
                 </div>
-                <div className="shrink-0 text-right">
+                <div className="shrink-0 whitespace-nowrap text-right">
                   <div className="text-lg font-bold tabular-nums">{eur(r.costeSegundoAnio)}</div>
                   <div className="text-[11px] text-[var(--color-tenue)]">al mes, estable</div>
                 </div>
               </div>
 
-              <div className="mt-2.5 flex items-center gap-3 border-t border-[var(--color-borde)] pt-2.5 text-xs">
+              <div className="mt-2.5 flex flex-wrap items-center gap-x-3 gap-y-1.5 border-t border-[var(--color-borde)] pt-2.5 text-xs">
                 <span className="text-[var(--color-tenue)]">1er año</span>
                 <span className="tabular-nums">{eur(r.costePrimerAnio)}</span>
                 {r.tienePromocion && (

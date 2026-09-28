@@ -115,8 +115,8 @@ export default function App() {
 
       {error && <div className="mb-5"><Aviso>{error}</Aviso></div>}
 
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)] lg:items-start">
-        <div className="space-y-5">
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)] lg:items-start">
+        <div className="min-w-0 space-y-5">
           <ZonaPDF onFichero={subir} cargando={cargando} />
 
           {lectura && (
@@ -173,7 +173,7 @@ export default function App() {
           </Panel>
         </div>
 
-        <div className="space-y-5">
+        <div className="min-w-0 space-y-5">
           {!listo ? (
             <Panel>
               <p className="py-8 text-center text-sm text-[var(--color-tenue)]">
@@ -187,7 +187,7 @@ export default function App() {
                 {([['excel', 'Recomendadas', excel ? `${excel.tarifas.length} del Excel` : 'sin el Excel'],
                    ['cnmc', 'Todas', `${cnmc?.tarifas.length ?? 0} de la CNMC`]] as const).map(([k, t, sub]) => (
                   <button key={k} onClick={() => setFuente(k)} disabled={k === 'excel' && !excel}
-                    className={`flex-1 rounded-lg px-3 py-2 text-sm transition disabled:opacity-30
+                    className={`min-w-0 flex-1 truncate rounded-lg px-2 py-2 text-sm transition disabled:opacity-30
                       ${fuente === k ? 'bg-[var(--color-acento)] font-semibold text-slate-950' : 'text-[var(--color-tenue)] hover:text-[var(--color-tinta)]'}`}>
                     {t}<span className={`ml-1.5 text-[11px] ${fuente === k ? 'text-slate-700' : ''}`}>{sub}</span>
                   </button>

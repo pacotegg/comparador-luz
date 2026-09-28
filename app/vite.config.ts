@@ -20,6 +20,12 @@ export default defineConfig({
     react(),
     tailwind(),
     VitePWA({
+      // Dentro del APK NO se registra service worker. Capacitor ya sirve los
+      // ficheros desde el propio paquete, y el SW los cachea encima: medido, un
+      // APK actualizado seguia mostrando el bundle viejo hasta borrar los datos
+      // de la app. Fuera del APK si se quiere, que es lo que da el modo sin
+      // conexion en la web.
+      disable: process.env.DESTINO === 'android',
       registerType: 'autoUpdate',
       includeAssets: ['favicon.svg'],
       manifest: {
