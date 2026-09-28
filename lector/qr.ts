@@ -57,6 +57,55 @@ export function interpretarQR(texto: string): DatosQR | null {
 }
 
 /**
+ * Saca un objeto de imagen del PDF. En el navegador `objs.get(nombre)` devuelve
+ * el objeto directamente; en Node hay que pasarle una funcion.
+ */
+async function objeto(page: any, nombre: string): Promise<any> {
+  try {
+    const o = page.objs.get(nombre);
+    if (o) return o;
+  } catch { /* todavia no resuelto: se prueba con funcion */ }
+  try {
+    return await new Promise((ok, mal) => page.objs.get(nombre, (o: any) => (o ? ok(o) : mal(0))));
+  } catch { return null; }
+}
+
+/**
+ * Pixeles en RGBA, que es lo unico que entiende jsQR.
+ *
+ * OJO: pdf.js NO devuelve lo mismo en los dos sitios. En Node da `data` con los
+ * pixeles crudos; en el navegador da un `bitmap` (ImageBitmap) y `data` viene
+ * vacio. Comprobar solo `data` hacia que en el navegador se saltara TODAS las
+ * imagenes y no se encontrara nunca un QR, mientras en Node funcionaba.
+ */
+async function aRGBA(img: any): Promise<Uint8ClampedArray | null> {
+  const { width: w, height: h } = img;
+
+  if (img.bitmap && typeof OffscreenCanvas !== 'undefined') {
+    const lienzo = new OffscreenCanvas(w, h);
+    const ctx = lienzo.getContext('2d');
+    if (!ctx) return null;
+    ctx.drawImage(img.bitmap, 0, 0);
+    return ctx.getImageData(0, 0, w, h).data;
+  }
+
+  const data = img.data;
+  if (!data) return null;
+  const canales = data.length / (w * h);
+  if (canales < 1 || canales > 4) return null;
+
+  const rgba = new Uint8ClampedArray(w * h * 4);
+  for (let k = 0; k < w * h; k++) {
+    const s = k * canales;
+    rgba[k * 4] = data[s];
+    rgba[k * 4 + 1] = data[s + (canales > 2 ? 1 : 0)];
+    rgba[k * 4 + 2] = data[s + (canales > 2 ? 2 : 0)];
+    rgba[k * 4 + 3] = 255;
+  }
+  return rgba;
+}
+
+/**
  * Recorre las imagenes incrustadas del PDF buscando un QR.
  * `doc` es un PDFDocumentProxy de pdfjs-dist.
  */
@@ -69,26 +118,13 @@ export async function buscarQR(doc: any, OPS: any): Promise<DatosQR | null> {
       if (ops.fnArray[i] !== OPS.paintImageXObject) continue;
       const nombre = ops.argsArray[i][0];
 
-      let img: any;
-      try {
-        img = await new Promise((ok, mal) => page.objs.get(nombre, (o: any) => (o ? ok(o) : mal(0))));
-      } catch { continue; }
-      if (!img?.width || !img?.data) continue;
+      const img = await objeto(page, nombre);
+      if (!img?.width) continue;
 
-      const { width: w, height: h, data } = img;
-      const canales = data.length / (w * h);
-      if (canales < 1 || canales > 4) continue;
+      const rgba = await aRGBA(img);
+      if (!rgba) continue;
 
-      // jsQR quiere RGBA pase lo que pase.
-      const rgba = new Uint8ClampedArray(w * h * 4);
-      for (let k = 0; k < w * h; k++) {
-        const s = k * canales;
-        rgba[k * 4] = data[s];
-        rgba[k * 4 + 1] = data[s + (canales > 2 ? 1 : 0)];
-        rgba[k * 4 + 2] = data[s + (canales > 2 ? 2 : 0)];
-        rgba[k * 4 + 3] = 255;
-      }
-
+      const { width: w, height: h } = img;
       const qr = jsQR(rgba, w, h);
       if (!qr) continue;
       const datos = interpretarQR(qr.data);

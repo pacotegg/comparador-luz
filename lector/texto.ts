@@ -72,15 +72,20 @@ export function leerTexto(txt: string): Lectura {
 
   // --- Potencias --------------------------------------------------------
   // Ojo: Nufri llama P3 a la valle, no P2.
+  //
+  // Y ojo con el (?!h): sin el, "P2 10 kWh" —que es un CONSUMO— casa como 10 kW
+  // de potencia, porque kW es prefijo de kWh. Medido sobre una factura de Nufri
+  // leida en el navegador: daba 10 kW de potencia valle en vez de 3,45. En Node
+  // no salia porque ahi el QR gana y nadie llegaba a mirar el texto.
+  const kW = String.raw`\s*kW(?!h)`;
   const potP1 = buscar(txt, [
-    ['"Potencia punta: N kW"', new RegExp(String.raw`Potencia\s+punta\s*:?\s*${N}\s*kW`, 'i')],
-    ['"P1 N kW"', new RegExp(String.raw`\bP1\s+${N}\s*kW`)],
-    ['detalle potencia P1', new RegExp(String.raw`P1\s+${N}\s*kW\s*x`)],
+    ['"Potencia punta: N kW"', new RegExp(String.raw`Potencia\s+punta\s*:?\s*${N}${kW}`, 'i')],
+    ['"P1 N kW"', new RegExp(String.raw`\bP1\s+${N}${kW}`)],
   ]);
   const potP2 = buscar(txt, [
-    ['"Potencia valle: N kW"', new RegExp(String.raw`Potencia\s+valle\s*:?\s*${N}\s*kW`, 'i')],
-    ['"P2 N kW"', new RegExp(String.raw`\bP2\s+${N}\s*kW`)],
-    ['"P3 N kW" (Nufri)', new RegExp(String.raw`\bP3\s+${N}\s*kW`)],
+    ['"Potencia valle: N kW"', new RegExp(String.raw`Potencia\s+valle\s*:?\s*${N}${kW}`, 'i')],
+    ['"P2 N kW"', new RegExp(String.raw`\bP2\s+${N}${kW}`)],
+    ['"P3 N kW" (Nufri)', new RegExp(String.raw`\bP3\s+${N}${kW}`)],
   ]);
 
   // --- Consumos por periodo --------------------------------------------
