@@ -18,6 +18,8 @@ export interface Lectura {
   excedentes: Campo<number> | null;
   /** Solo lo rellenan las tarifas de un periodo, que no desglosan punta/llano/valle. */
   consumoTotal: Campo<number> | null;
+  /** Peaje detectado cuando NO es la domestica 2.0TD: '3.0TD', 'de seis periodos'... */
+  peajeNoDomestico: string | null;
   precioExcedente: Campo<number> | null;
   totalFactura: Campo<number> | null;
   avisos: string[];
@@ -73,11 +75,42 @@ function soloElectricidad(txt: string): { texto: string; recortado: boolean } {
   return { texto: fin > 0 ? resto.slice(0, fin) : resto, recortado: true };
 }
 
+/**
+ * Detecta si la factura NO es de una tarifa domestica 2.0TD.
+ *
+ * Importa mucho: todo el comparador —el Excel de la Plataforma y las ofertas de
+ * la CNMC— es de 2.0TD, tres periodos y hasta 15 kW. Una 3.0TD o una 6.1TD tiene
+ * SEIS periodos de potencia y de energia, y ninguna de esas 99 tarifas le aplica.
+ *
+ * Medido sobre una Naturgy real (28/09/2026): "Termino de potencia P1..P6
+ * (15,000 kW)" y consumos de 1.576 kWh en un solo periodo. El lector sacaba
+ * dias y potencia tan contento, y el usuario habria acabado con un ranking
+ * perfectamente formateado y perfectamente inaplicable.
+ */
+function noEsDomestica(txt: string): string | null {
+  const explicito = txt.match(/\b([36]\.[01]\s*T\s*D)\b/i);
+  if (explicito) return explicito[1].replace(/\s+/g, '');
+  // Sin mencion explicita: si hay periodos P4/P5/P6, no es 2.0TD.
+  if (/\bP[456]\b/.test(txt) && /potencia\s+P[456]|periodo\s+P[456]|Activa\s+P[456]/i.test(txt)) {
+    return 'de seis periodos';
+  }
+  return null;
+}
+
 export function leerTexto(textoCompleto: string): Lectura {
   const avisos: string[] = [];
   const { texto: txt, recortado } = soloElectricidad(textoCompleto);
   if (recortado) {
     avisos.push('Es una factura de gas y electricidad: solo se han leido los datos de la parte electrica.');
+  }
+
+  const otroPeaje = noEsDomestica(textoCompleto);
+  if (otroPeaje) {
+    avisos.push(
+      `Esta factura es de una tarifa ${otroPeaje}, no de la domestica 2.0TD. ` +
+      'Este comparador solo lleva tarifas 2.0TD de tres periodos, asi que NINGUNA ' +
+      'de las que muestra le aplica a este suministro.',
+    );
   }
 
   // --- Dias -------------------------------------------------------------
@@ -174,6 +207,19 @@ export function leerTexto(textoCompleto: string): Lectura {
     ['tabla de peajes (Endesa)', tablaATR('Valle')],
   ], ES_CONSUMO);
 
+  // Repsol mete los tres periodos en UNA fila, bajo una cabecera "Punta Llano
+  // Valle" que la extraccion de texto deja en otra linea:
+  //   "Activa : Consumo del periodo (Real) hasta 05.12.2022 42 kWh 44 kWh 56 kWh"
+  // Se usa solo como ultimo recurso, cuando los patrones por periodo no dan nada.
+  const fila = txt.match(new RegExp(String.raw`Activa\s*:[^\n]*?${N}\s*kWh\s+${N}\s*kWh\s+${N}\s*kWh`, 'i'));
+  const deFila = (i: number): Campo<number> | null => {
+    const v = fila ? aNumero(fila[i]) : null;
+    return v !== null && ES_CONSUMO(v) ? { valor: v, patron: 'fila "Activa" de tres periodos (Repsol)' } : null;
+  };
+  const punta = cPunta ?? deFila(1);
+  const llano = cLlano ?? deFila(2);
+  const valle = cValle ?? deFila(3);
+
   // Consumo total, para las tarifas de un solo periodo que no desglosan nada
   // (Naturgy Por Uso Luz: "Consumo electricidad 64 kWh"). Sin el reparto, la app
   // no puede comparar: hay que ofrecerle al usuario uno de los repartos por
@@ -210,9 +256,9 @@ export function leerTexto(textoCompleto: string): Lectura {
     avisos.push(`La suma de los periodos (${suma.toFixed(2)} kWh) no cuadra con el total declarado (${declarado.toFixed(2)} kWh). Revisa los consumos antes de fiarte del resultado.`);
   }
 
-  for (const [nombre, c] of Object.entries({ dias, potP1, potP2, cPunta, cLlano, cValle })) {
+  for (const [nombre, c] of Object.entries({ dias, potP1, potP2, cPunta: punta, cLlano: llano, cValle: valle })) {
     if (!c) avisos.push(`No he sabido leer: ${nombre}. Hay que meterlo a mano.`);
   }
 
-  return { dias, potP1, potP2, cPunta, cLlano, cValle, excedentes, consumoTotal, precioExcedente, totalFactura, avisos };
+  return { dias, potP1, potP2, cPunta: punta, cLlano: llano, cValle: valle, excedentes, consumoTotal, peajeNoDomestico: otroPeaje, precioExcedente, totalFactura, avisos };
 }

@@ -44,6 +44,9 @@ export default function App() {
   const [cargando, setCargando] = useState(false);
   const [todas, setTodas] = useState(false);
   const [detalle, setDetalle] = useState<string | null>(null);
+  // Cuando la factura no es 2.0TD el ranking no aplica y no se ensenya, salvo
+  // que se pida a proposito.
+  const [verAunqueNoAplique, setVerAunqueNoAplique] = useState(false);
   const [fuente, setFuente] = useState<Fuente>('cnmc');
 
   useEffect(() => {
@@ -213,7 +216,23 @@ export default function App() {
                 ))}
               </div>
 
-              {fuente === 'cnmc' || !excel ? (
+              {lectura?.peajeNoDomestico && !verAunqueNoAplique ? (
+                <Panel titulo="Esta comparación no te sirve">
+                  <Aviso>
+                    Tu factura es de una tarifa <strong>{lectura.peajeNoDomestico}</strong>, con
+                    seis periodos. Este comparador solo lleva tarifas domésticas{' '}
+                    <strong>2.0TD</strong>, de tres periodos y hasta 15 kW, así que{' '}
+                    <strong>ninguna de las {(excel?.tarifas.length ?? 0) + (cnmc?.tarifas.length ?? 0)} que
+                    tiene le aplica a este suministro</strong>. Un ranking aquí sería
+                    un número bonito y equivocado.
+                  </Aviso>
+                  <div className="mt-3">
+                    <Boton tipo="suave" onClick={() => setVerAunqueNoAplique(true)}>
+                      Enséñamelo igualmente
+                    </Boton>
+                  </div>
+                </Panel>
+              ) : fuente === 'cnmc' || !excel ? (
                 <ResultadosCNMC res={resultadosCNMC} verificadas={cnmc?.verificadas ?? '?'} excedentes={consumo.excedentes} />
               ) : (
               <>

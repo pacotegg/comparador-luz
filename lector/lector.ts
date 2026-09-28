@@ -36,6 +36,12 @@ export interface Resultado {
    * comparar: la app tiene que ofrecer uno de los repartos por defecto.
    */
   consumoTotalSinDesglose: number | null;
+  /**
+   * Rellenado cuando la factura NO es de una tarifa domestica 2.0TD. Ninguna de
+   * las tarifas del comparador le aplica, asi que la app no debe ensenyar un
+   * ranking como si nada.
+   */
+  peajeNoDomestico: string | null;
   potenciaSugerida: number | null;
   totalFactura: number | null;
   cups: string | null;
@@ -114,6 +120,7 @@ export async function leerFactura(doc: any, OPS: any): Promise<Resultado> {
     consumoTotalSinDesglose:
       campos.cPunta === null && campos.cLlano === null && campos.cValle === null
         ? (t.consumoTotal?.valor ?? null) : null,
+    peajeNoDomestico: t.peajeNoDomestico,
     totalFactura: qr?.totalFactura ?? t.totalFactura?.valor ?? null,
     cups: qr?.cups ?? null,
     tieneQR: qr !== null,
