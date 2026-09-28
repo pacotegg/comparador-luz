@@ -27,6 +27,13 @@ interface DatosExcel {
 
 type Fuente = 'excel' | 'cnmc';
 
+/**
+ * Donde vive la copia al dia de las tarifas. La actualiza sola la tarea del
+ * HTPC cada dos dias. El APK la consulta para no quedarse congelado con los
+ * datos del dia que se compilo.
+ */
+const PUBLICADO = 'https://pacotegg.github.io/comparador-luz';
+
 /** Repartos por defecto, sacados del post #3 y de la celda D34 del Excel. */
 const REPARTOS = [
   { nombre: '25 / 25 / 50', texto: 'El que recomienda el post #3 si no conoces tu reparto', p: [0.25, 0.25, 0.50] },
@@ -50,10 +57,34 @@ export default function App() {
   const [fuente, setFuente] = useState<Fuente>('cnmc');
 
   useEffect(() => {
-    fetch('./tarifas-cnmc.json')
-      .then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); })
-      .then(setCnmc)
-      .catch(e => setError(`No he podido cargar las ofertas de la CNMC: ${e.message}`));
+    /**
+     * Las tarifas se buscan primero en la copia PUBLICADA y, si no hay red, se
+     * usa la que viene dentro.
+     *
+     * Hace falta por el APK: empaqueta los datos al compilar y se quedarian
+     * congelados para siempre, mientras que la web se renueva en cada
+     * despliegue. Con esto el APK tambien se pone al dia solo.
+     *
+     * No se envia nada tuyo: es pedir un fichero publico, igual que abrir una
+     * pagina. Si no hay red, funciona con lo que lleva dentro.
+     */
+    // Solo el APK va a buscarlos fuera. La web ya sirve su propia copia, que se
+    // renueva en cada despliegue; si tirase de la publicada, en desarrollo
+    // taparia los cambios locales y ademas pediria dos veces lo mismo.
+    const esApp = typeof (window as any).Capacitor !== 'undefined';
+    const cargar = async (nombre: string) => {
+      const donde = esApp ? [`${PUBLICADO}/${nombre}`, `./${nombre}`] : [`./${nombre}`];
+      for (const url of donde) {
+        try {
+          const r = await fetch(url, { cache: 'no-cache' });
+          if (r.ok) return await r.json();
+        } catch { /* se prueba la siguiente */ }
+      }
+      return null;
+    };
+
+    cargar('tarifas-cnmc.json')
+      .then(d => { if (d) setCnmc(d); else setError('No he podido cargar las ofertas de la CNMC.'); });
 
     // Opcional a proposito: en el despliegue publico este fichero no existe.
     fetch('./tarifas-excel.json')
@@ -330,6 +361,13 @@ export default function App() {
       <footer className="mt-10 text-center text-xs leading-relaxed text-[var(--color-tenue)]">
         Datos del hilo <em>Yo pago MENOS DE LUZ y DE GAS</em> de ForoCoches, mantenido a mano
         por JavierRR, Ivansnoke y Omadón. Tu factura no sale de este dispositivo.
+        {cnmc?.generado && (
+          <>
+            <br />
+            Tarifas descargadas el {new Date(cnmc.generado).toLocaleDateString('es-ES')}. Se
+            revisan cada dos días.
+          </>
+        )}
       </footer>
     </div>
   );
