@@ -71,6 +71,14 @@ async function main() {
 
   // Diff contra lo que ya teniamos, para saber que ha cambiado esta semana.
   const previo = await fs.readFile(SALIDA_EXCEL, 'utf8').then(JSON.parse).catch(() => null);
+
+  // El hilo se renueva por volumenes. Cuando abren el siguiente, este deja de
+  // actualizarse y seguiriamos bajando el mismo Excel para siempre sin que nada
+  // fallara. Por eso se compara con el volumen de la semana pasada.
+  if (previo?.fuente?.volumen && previo.fuente.volumen !== hilo.volumen) {
+    log(`  ATENCION: el hilo ha cambiado de volumen (${previo.fuente.volumen} -> ${hilo.volumen}).`);
+    log('  Comprueba que sigue siendo el hilo vigente de la Plataforma.');
+  }
   if (previo) {
     const antes = new Map(previo.tarifas.map((t: any) => [t.comercializadora + '|' + t.tarifa, t]));
     let cambios = 0;

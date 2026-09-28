@@ -1,0 +1,8 @@
+# Normalizar finales de linea: si no, cada commit llena la salida de avisos
+# "LF will be replaced by CRLF" y los diffs entre Windows y CI son ruido.
+* text=auto eol=lf
+*.ps1 text eol=crlf
+*.bat text eol=crlf
+*.png binary
+*.apk binary
+*.xlsx binary

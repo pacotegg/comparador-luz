@@ -29,10 +29,14 @@ jobs:
 
       - run: npm ci
 
-      - name: Comprobar que no se cuela el dataset curado
+      - name: Comprobar que no se cuela ningun dato curado
+        # Lista blanca, no negra: un fichero nuevo o renombrado ya se colo una vez
+        # por comprobar solo nombres concretos.
         run: |
-          if [ -f datos/tarifas-excel.json ] || [ -f app/public/tarifas-excel.json ]; then
-            echo "El dataset del Excel esta en el repo y no deberia estarlo."
+          malos=$(find datos app/public -maxdepth 1 -name '*.json' ! -name 'tarifas-cnmc.json' 2>/dev/null)
+          if [ -n "$malos" ]; then
+            echo "Hay ficheros de datos que no deberian publicarse:"
+            echo "$malos"
             exit 1
           fi
           echo "Limpio: solo se publica tarifas-cnmc.json"
@@ -41,8 +45,10 @@ jobs:
 
       - name: Y que tampoco esta en el build
         run: |
-          if [ -f app/dist/tarifas-excel.json ]; then
-            echo "El build contiene el dataset del Excel."
+          malos=$(find app/dist -maxdepth 1 -name '*.json' ! -name 'tarifas-cnmc.json' ! -name 'manifest.webmanifest')
+          if [ -n "$malos" ]; then
+            echo "El build contiene datos que no deberian publicarse:"
+            echo "$malos"
             exit 1
           fi
           ls -la app/dist
