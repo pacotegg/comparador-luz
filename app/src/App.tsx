@@ -22,8 +22,9 @@ interface DatosCNMC {
  */
 interface DatosExcel {
   actualizadoExcel: string;
-  fuente: { hilo: string; volumen: string; excel: string };
-  verificacion: { comparadas: number; divergencias: number };
+  fuente?: { hilo: string; volumen: string; excel: string };
+  /** Solo la pone el HTPC: el movil no recalcula con LibreOffice. */
+  verificacion?: { comparadas: number; divergencias: number };
   constantes: Constantes;
   tarifas: (TarifaCalculable & { ultimoCambio: string | null; nota: string | null; permanencia: string | null })[];
 }
@@ -161,7 +162,7 @@ export default function App() {
         <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Comparador de luz</h1>
         <p className="mt-1.5 text-sm text-[var(--color-tenue)]">
           {excel
-            ? <>Con las tarifas del Excel de la Plataforma de ForoCoches, actualizado el {new Date(excel.actualizadoExcel).toLocaleDateString('es-ES')}.</>
+            ? <>Con las tarifas del Excel de la Plataforma de ForoCoches{excel.actualizadoExcel ? `, actualizado el ${new Date(excel.actualizadoExcel).toLocaleDateString('es-ES')}` : ''}.</>
             : <>Con las ofertas registradas en el comparador oficial de la CNMC.</>}
         </p>
       </header>
@@ -340,7 +341,10 @@ export default function App() {
                 <>
                   Precios sin impuestos, como manda el hilo: las compañías publican mal los
                   precios con impuestos. El total sí los lleva.{' '}
-                  {excel && `Motor verificado contra el Excel: ${excel.verificacion.comparadas - excel.verificacion.divergencias}/${excel.verificacion.comparadas}.`}
+                  {/* Las tarifas descargadas en el propio movil no traen esta
+                      comprobacion: la hace el HTPC recalculando con LibreOffice.
+                      Sin el interrogante, leerla reventaba la pagina entera. */}
+                  {excel?.verificacion && `Motor verificado contra el Excel: ${excel.verificacion.comparadas - excel.verificacion.divergencias}/${excel.verificacion.comparadas}.`}
                 </>
               }>
                 <div className="flex flex-wrap items-center gap-2">

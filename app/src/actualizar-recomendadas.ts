@@ -55,6 +55,21 @@ async function descargar(url: string): Promise<Uint8Array> {
   return bytes;
 }
 
+/**
+ * ¿Es el mismo precio? Con tolerancia, NO con ===.
+ *
+ * LibreOffice guarda un digito menos que el que sale al calcular la formula en
+ * JavaScript, asi que los mismos precios difieren en ~3e-17. Comparando estricto
+ * el boton decia "han cambiado 3 tarifas" cada vez que se pulsaba, aunque el
+ * fichero fuera identico. Medido el 28/09/2026 sobre G9, S9 y U9.
+ */
+const mismoPrecio = (a: unknown, b: unknown): boolean => {
+  if (typeof a === 'number' && typeof b === 'number') {
+    return Math.abs(a - b) <= 1e-9 * Math.max(1, Math.abs(a), Math.abs(b));
+  }
+  return (a ?? null) === (b ?? null);
+};
+
 /** Cuenta cuantas tarifas han cambiado de precio respecto a las que ya teniamos. */
 function cuantasCambian(nuevas: any[], viejas: any[] | undefined): number {
   if (!viejas?.length) return nuevas.length;
@@ -63,7 +78,7 @@ function cuantasCambian(nuevas: any[], viejas: any[] | undefined): number {
     const v = viejas.find(x => x.comercializadora === t.comercializadora && x.tarifa === t.tarifa);
     if (!v) { n++; continue; }
     for (const c of ['potPuntaDia', 'potValleDia', 'ePunta', 'eLlano', 'eValle', 'excedentes', 'descuentoDia']) {
-      if (v[c] !== t[c]) { n++; break; }
+      if (!mismoPrecio(v[c], t[c])) { n++; break; }
     }
   }
   return n;
