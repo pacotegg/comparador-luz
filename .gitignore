@@ -35,3 +35,12 @@ keystore.properties
 
 # APK generados
 *.apk
+
+# --- Datos: lista BLANCA, no negra ---
+# Un fichero viejo renombrado (tarifas-viejo-fusionado.json) se colo al repo
+# publico porque la lista era de nombres concretos. Ahora se ignora TODO y se
+# permite solo lo que de verdad se publica.
+datos/*.json
+!datos/tarifas-cnmc.json
+app/public/*.json
+!app/public/tarifas-cnmc.json
