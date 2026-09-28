@@ -25,16 +25,34 @@ export interface Lectura {
 
 const N = String.raw`([\d.]+,?\d*)`;
 
-/** Prueba patrones en orden y devuelve el primero que da un numero valido. */
-function buscar(txt: string, patrones: [string, RegExp][]): Campo<number> | null {
+/**
+ * Prueba patrones en orden y devuelve el primero que da un numero PLAUSIBLE.
+ *
+ * Lo de plausible no es adorno: una lamina didactica que explica las partes de
+ * una factura trae "Alquiler equipos de medida: 00 dias x 000 €/dia", y de ahi
+ * salia `dias = 0`. Un cero se cuela como dato bueno y revienta el calculo, que
+ * es peor que no leer nada: al menos un null se ve y se rellena a mano.
+ *
+ * Si una coincidencia no es plausible se sigue buscando dentro del mismo
+ * patron, que a veces la buena esta mas adelante.
+ */
+function buscar(txt: string, patrones: [string, RegExp][], plausible?: (v: number) => boolean): Campo<number> | null {
   for (const [nombre, re] of patrones) {
-    const m = txt.match(re);
-    if (!m) continue;
-    const v = aNumero(m[1]);
-    if (v !== null) return { valor: v, patron: nombre };
+    const global = new RegExp(re.source, re.flags.includes('g') ? re.flags : re.flags + 'g');
+    for (const m of txt.matchAll(global)) {
+      const v = aNumero(m[1]);
+      if (v === null) continue;
+      if (plausible && !plausible(v)) continue;
+      return { valor: v, patron: nombre };
+    }
   }
   return null;
 }
+
+/** Rangos con los que se descarta una lectura absurda. */
+const ES_DIAS = (v: number) => v >= 1 && v <= 400;
+const ES_POTENCIA = (v: number) => v > 0 && v <= 100;
+const ES_CONSUMO = (v: number) => v >= 0 && v <= 200_000;
 
 /**
  * Recorta el texto a la parte de ELECTRICIDAD cuando la factura trae tambien gas.
@@ -80,7 +98,7 @@ export function leerTexto(textoCompleto: string): Lectura {
     ['contador "NN dias"', new RegExp(String.raw`[Aa]lquiler[^\n]*?${N}\s*d[ií]as`)],
     ['detalle "x NN Dias"', new RegExp(String.raw`x\s*(\d{1,3})\s*[Dd][ií]as`)],
     ['"NN dias" del contrato', new RegExp(String.raw`[Cc]ontrato\s*:?\s*(\d{1,3})\s*d[ií]as`)],
-  ]);
+  ], ES_DIAS);
 
   // Si el detalle esta partido en tramos, los tramos tienen que sumar el periodo.
   if (dias) {
@@ -118,7 +136,7 @@ export function leerTexto(textoCompleto: string): Lectura {
     // Naturgy: "Termino de potencia P1 (4,400 kW)" — el kW va DENTRO del parentesis
     ['"potencia P1 (N kW)" (Naturgy)', new RegExp(String.raw`potencia\s+P1\s*\(\s*${N}${kW}`, 'i')],
     ['"P1 N kW"', new RegExp(String.raw`\bP1\s+${N}${kW}`)],
-  ]);
+  ], ES_POTENCIA);
   const potP2 = buscar(txt, [
     ['"Potencia valle: N kW"', new RegExp(String.raw`Potencia\s+valle\s*:?\s*${N}${kW}`, 'i')],
     ['"; valle N kW" (Endesa)', new RegExp(String.raw`contratadas[^\n]*?valle\s*${N}${kW}`, 'i')],
@@ -126,7 +144,7 @@ export function leerTexto(textoCompleto: string): Lectura {
     ['"potencia P2 (N kW)" (Naturgy)', new RegExp(String.raw`potencia\s+P2\s*\(\s*${N}${kW}`, 'i')],
     ['"P2 N kW"', new RegExp(String.raw`\bP2\s+${N}${kW}`)],
     ['"P3 N kW" (Nufri)', new RegExp(String.raw`\bP3\s+${N}${kW}`)],
-  ]);
+  ], ES_POTENCIA);
 
   // --- Consumos por periodo --------------------------------------------
   // TRAMPA: Iberdrola trae DOS juegos. El bueno es el resumen "Punta: N kWh".
@@ -144,17 +162,17 @@ export function leerTexto(textoCompleto: string): Lectura {
     ['resumen "Punta: N kWh"', new RegExp(String.raw`(?<!desagregados[^\n]{0,80})\bPunta:\s*${N}\s*kWh`)],
     ['detalle "P1 N kWh x"', new RegExp(String.raw`\bP1\s+${N}\s*kWh\s*x`)],
     ['tabla de peajes (Endesa)', tablaATR('Punta')],
-  ]);
+  ], ES_CONSUMO);
   const cLlano = buscar(txt, [
     ['resumen "Llano: N kWh"', new RegExp(String.raw`(?<!desagregados[^\n]{0,80})\bLlano:\s*${N}\s*kWh`)],
     ['detalle "P2 N kWh x"', new RegExp(String.raw`\bP2\s+${N}\s*kWh\s*x`)],
     ['tabla de peajes (Endesa)', tablaATR('Llano')],
-  ]);
+  ], ES_CONSUMO);
   const cValle = buscar(txt, [
     ['resumen "Valle: N kWh"', new RegExp(String.raw`(?<!desagregados[^\n]{0,80})\bValle:?\s*${N}\s*kWh`)],
     ['detalle "P3 N kWh x"', new RegExp(String.raw`\bP3\s+${N}\s*kWh\s*x`)],
     ['tabla de peajes (Endesa)', tablaATR('Valle')],
-  ]);
+  ], ES_CONSUMO);
 
   // Consumo total, para las tarifas de un solo periodo que no desglosan nada
   // (Naturgy Por Uso Luz: "Consumo electricidad 64 kWh"). Sin el reparto, la app
