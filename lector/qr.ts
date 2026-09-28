@@ -65,9 +65,17 @@ async function objeto(page: any, nombre: string): Promise<any> {
     const o = page.objs.get(nombre);
     if (o) return o;
   } catch { /* todavia no resuelto: se prueba con funcion */ }
-  try {
-    return await new Promise((ok, mal) => page.objs.get(nombre, (o: any) => (o ? ok(o) : mal(0))));
-  } catch { return null; }
+
+  // OJO con el tiempo limite: si el objeto no llega nunca, esa funcion no se
+  // llama nunca y la promesa se queda colgada para siempre. Medido en el
+  // WebView de Android: la app se quedaba en "Leyendo la factura..." sin dar
+  // error ni terminar. El QR es un atajo, no puede bloquear la lectura.
+  return new Promise(ok => {
+    const reloj = setTimeout(() => ok(null), 3000);
+    try {
+      page.objs.get(nombre, (o: any) => { clearTimeout(reloj); ok(o ?? null); });
+    } catch { clearTimeout(reloj); ok(null); }
+  });
 }
 
 /**
@@ -109,12 +117,19 @@ async function aRGBA(img: any): Promise<Uint8ClampedArray | null> {
  * Recorre las imagenes incrustadas del PDF buscando un QR.
  * `doc` es un PDFDocumentProxy de pdfjs-dist.
  */
+/** Tiempo maximo que se le dedica a buscar el QR antes de tirar del texto. */
+const PRESUPUESTO_MS = 12_000;
+
 export async function buscarQR(doc: any, OPS: any): Promise<DatosQR | null> {
+  const limite = Date.now() + PRESUPUESTO_MS;
+
   for (let pagina = 1; pagina <= doc.numPages; pagina++) {
+    if (Date.now() > limite) return null;
     const page = await doc.getPage(pagina);
     const ops = await page.getOperatorList();
 
     for (let i = 0; i < ops.fnArray.length; i++) {
+      if (Date.now() > limite) return null;
       if (ops.fnArray[i] !== OPS.paintImageXObject) continue;
       const nombre = ops.argsArray[i][0];
 

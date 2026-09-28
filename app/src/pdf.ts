@@ -10,11 +10,16 @@ import type { Resultado } from '@lector/lector.ts';
  */
 export async function leerPDF(fichero: File): Promise<Resultado> {
   const [pdfjs, worker, lector] = await Promise.all([
-    import('pdfjs-dist'),
-    import('pdfjs-dist/build/pdf.worker.min.mjs?url'),
+    import('pdfjs-dist/legacy/build/pdf.mjs'),
+    import('pdfjs-dist/legacy/build/pdf.worker.min.mjs?url'),
     import('@lector/lector.ts'),
   ]);
 
+  // Build LEGACY a proposito. La moderna usa un worker de tipo modulo y el
+  // WebView de Android no lo arranca: getDocument() no resolvia nunca y la app
+  // se quedaba en "Leyendo la factura..." para siempre, sin error. La legacy usa
+  // un worker clasico y es ademas la que se valida en Node.
+  //
   // El worker se empaqueta con la app: funciona sin conexion y sin pedirle nada
   // a ningun CDN, que ademas seria un tercero mirando lo que haces.
   pdfjs.GlobalWorkerOptions.workerSrc = worker.default;
