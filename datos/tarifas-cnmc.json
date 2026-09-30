@@ -1,9 +1,9 @@
 {
-  "generado": "2026-09-28T19:10:57.893Z",
+  "generado": "2026-09-30T07:00:23.639Z",
   "fuente": "Comparador oficial de ofertas de la CNMC",
   "excelDelHilo": "https://www.dropbox.com/scl/fi/mhf19qbkz35pmgl84xfhc/Comparador-electricidad.v3.xlsx?rlkey=u0ks5cfr3ns9ym9yo2y9satel&dl=1",
   "codigoPostal": "28001",
-  "verificadas": "82/86",
+  "verificadas": "80/84",
   "tarifas": [
     {
       "comercializadora": "CIDE HCENERGÍA S.A.U",
@@ -951,33 +951,6 @@
       "sospechosa": false
     },
     {
-      "comercializadora": "ENERGIA NUFRI SL",
-      "tarifa": "ENERGIA NUFRI - 2a RESIDENCIA 3P",
-      "primerAnio": {
-        "potPuntaDia": 0.08386643389308489,
-        "potValleDia": 0.010221221630719727,
-        "ePunta": 0.2858010817512781,
-        "eLlano": 0.1989206978901606,
-        "eValle": 0.15850756005793026,
-        "fijoDia": 0.06114999999999898,
-        "constante": -0.002599999999986835
-      },
-      "segundoAnio": {
-        "potPuntaDia": 0.08386643389308489,
-        "potValleDia": 0.010221221630719727,
-        "ePunta": 0.2858010817512781,
-        "eLlano": 0.1989206978901606,
-        "eValle": 0.15850756005793026,
-        "fijoDia": 0.06114999999999898,
-        "constante": -0.002599999999986835
-      },
-      "tienePromocion": false,
-      "soloNuevosClientes": false,
-      "penalizacion": false,
-      "verde": true,
-      "sospechosa": false
-    },
-    {
       "comercializadora": "IMAGINA ENERGIA",
       "tarifa": "PLAN BASE SIN HORAS",
       "primerAnio": {
@@ -1191,6 +1164,33 @@
       "soloNuevosClientes": false,
       "penalizacion": false,
       "verde": true,
+      "sospechosa": false
+    },
+    {
+      "comercializadora": "NATURGY CLIENTES, S.A.U.",
+      "tarifa": "Por Uso Luz",
+      "primerAnio": {
+        "potPuntaDia": 0.12317882478046822,
+        "potValleDia": 0.06132732978431818,
+        "ePunta": 0.11196168924726825,
+        "eLlano": 0.11196168924726825,
+        "eValle": 0.11196168924726825,
+        "fijoDia": 0.06240000000000068,
+        "constante": 0.060000000000002274
+      },
+      "segundoAnio": {
+        "potPuntaDia": 0.12317882478046822,
+        "potValleDia": 0.06132732978431818,
+        "ePunta": 0.11196168924726825,
+        "eLlano": 0.11196168924726825,
+        "eValle": 0.11196168924726825,
+        "fijoDia": 0.06240000000000068,
+        "constante": 0.060000000000002274
+      },
+      "tienePromocion": false,
+      "soloNuevosClientes": true,
+      "penalizacion": false,
+      "verde": false,
       "sospechosa": false
     },
     {
@@ -1492,7 +1492,7 @@
     },
     {
       "comercializadora": "REPSOL COMERCIALIZADORA DE ELECTRICIDAD Y GAS, S.L.U",
-      "tarifa": "Tarifa Sin Horarios Pyme",
+      "tarifa": "Tarifa Sin Horarios",
       "primerAnio": {
         "potPuntaDia": 0.08963225122323444,
         "potValleDia": 0.08963225122323444,
@@ -1519,7 +1519,7 @@
     },
     {
       "comercializadora": "REPSOL COMERCIALIZADORA DE ELECTRICIDAD Y GAS, S.L.U",
-      "tarifa": "Tarifa Sin Horarios",
+      "tarifa": "Tarifa Sin Horarios Pyme",
       "primerAnio": {
         "potPuntaDia": 0.08963225122323444,
         "potValleDia": 0.08963225122323444,
@@ -1923,33 +1923,6 @@
       "sospechosa": false
     },
     {
-      "comercializadora": "ENERGIA NUFRI SL",
-      "tarifa": "ENERGIA NUFRI - SOLAR",
-      "primerAnio": {
-        "potPuntaDia": 0.11164719012016912,
-        "potValleDia": 0.03773989525188811,
-        "ePunta": 0.29995354247073613,
-        "eLlano": 0.21307315860961862,
-        "eValle": 0.17266002077738837,
-        "fijoDia": 0.06249999999999967,
-        "constante": 0.01740000000001629
-      },
-      "segundoAnio": {
-        "potPuntaDia": 0.11164719012016912,
-        "potValleDia": 0.03773989525188811,
-        "ePunta": 0.29995354247073613,
-        "eLlano": 0.21307315860961862,
-        "eValle": 0.17266002077738837,
-        "fijoDia": 0.06249999999999967,
-        "constante": 0.01740000000001629
-      },
-      "tienePromocion": false,
-      "soloNuevosClientes": false,
-      "penalizacion": false,
-      "verde": true,
-      "sospechosa": false
-    },
-    {
       "comercializadora": "MET ENERGIA ESPAÑA, S.A",
       "tarifa": "PRECIO FIJO 24 h ELECTRICIDAD",
       "primerAnio": {
@@ -2028,33 +2001,6 @@
       "soloNuevosClientes": false,
       "penalizacion": true,
       "verde": false,
-      "sospechosa": false
-    },
-    {
-      "comercializadora": "OCTOPUS ENERGY ESPAÑA, S.L.U.",
-      "tarifa": "OCTOPUS 3",
-      "primerAnio": {
-        "potPuntaDia": 0.1200338335094776,
-        "potValleDia": 0.1200338335094776,
-        "ePunta": 0.16503341694523593,
-        "eLlano": 0.1249347782401048,
-        "eValle": 0.111018191865971,
-        "fijoDia": 0.06060000000000043,
-        "constante": 0.08920000000000172
-      },
-      "segundoAnio": {
-        "potPuntaDia": 0.1200338335094776,
-        "potValleDia": 0.1200338335094776,
-        "ePunta": 0.16503341694523593,
-        "eLlano": 0.1249347782401048,
-        "eValle": 0.111018191865971,
-        "fijoDia": 0.06060000000000043,
-        "constante": 0.08920000000000172
-      },
-      "tienePromocion": false,
-      "soloNuevosClientes": false,
-      "penalizacion": false,
-      "verde": true,
       "sospechosa": false
     },
     {
