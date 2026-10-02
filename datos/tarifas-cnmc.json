@@ -1,37 +1,10 @@
 {
-  "generado": "2026-09-30T07:00:23.639Z",
+  "generado": "2026-10-02T07:00:14.141Z",
   "fuente": "Comparador oficial de ofertas de la CNMC",
   "excelDelHilo": "https://www.dropbox.com/scl/fi/mhf19qbkz35pmgl84xfhc/Comparador-electricidad.v3.xlsx?rlkey=u0ks5cfr3ns9ym9yo2y9satel&dl=1",
   "codigoPostal": "28001",
-  "verificadas": "80/84",
+  "verificadas": "57/60",
   "tarifas": [
-    {
-      "comercializadora": "CIDE HCENERGÍA S.A.U",
-      "tarifa": "Plan Estrella Dúo",
-      "primerAnio": {
-        "potPuntaDia": 0.0783626991688511,
-        "potValleDia": 0.05975483414882296,
-        "ePunta": 0.11982416742474492,
-        "eLlano": 0.11982416742474492,
-        "eValle": 0.11982416742474492,
-        "fijoDia": -0.27405000000000007,
-        "constante": 0.14000000000000057
-      },
-      "segundoAnio": {
-        "potPuntaDia": 0.07836269916885118,
-        "potValleDia": 0.0600169167547388,
-        "ePunta": 0.1199027922065197,
-        "eLlano": 0.1199027922065197,
-        "eValle": 0.1199027922065197,
-        "fijoDia": 0.06080000000000052,
-        "constante": 0.03999999999997961
-      },
-      "tienePromocion": true,
-      "soloNuevosClientes": true,
-      "penalizacion": false,
-      "verde": false,
-      "sospechosa": false
-    },
     {
       "comercializadora": "DOMESTICA GAS Y ELECTRICIDAD SLU",
       "tarifa": "Visalia Luz Fijo Empieza sin Pagar",
@@ -276,33 +249,6 @@
       "sospechosa": false
     },
     {
-      "comercializadora": "CIDE HCENERGÍA S.A.U",
-      "tarifa": "Plan Ilumina Dúo Promo",
-      "primerAnio": {
-        "potPuntaDia": 0.07757645135110348,
-        "potValleDia": 0.010221221630719727,
-        "ePunta": 0.1689646560339743,
-        "eLlano": 0.1689646560339743,
-        "eValle": 0.1689646560339743,
-        "fijoDia": 0.06074999999999925,
-        "constante": 0.12000000000002586
-      },
-      "segundoAnio": {
-        "potPuntaDia": 0.07757645135110348,
-        "potValleDia": 0.010221221630719727,
-        "ePunta": 0.1689646560339743,
-        "eLlano": 0.1689646560339743,
-        "eValle": 0.1689646560339743,
-        "fijoDia": 0.06074999999999925,
-        "constante": 0.12000000000002586
-      },
-      "tienePromocion": false,
-      "soloNuevosClientes": false,
-      "penalizacion": false,
-      "verde": false,
-      "sospechosa": false
-    },
-    {
       "comercializadora": "DOMESTICA GAS Y ELECTRICIDAD SLU",
       "tarifa": "Visalia 3 Precios",
       "primerAnio": {
@@ -324,33 +270,6 @@
         "constante": 0.04880000000003193
       },
       "tienePromocion": false,
-      "soloNuevosClientes": false,
-      "penalizacion": false,
-      "verde": true,
-      "sospechosa": false
-    },
-    {
-      "comercializadora": "TELECOR S.A. UNIPERSONAL",
-      "tarifa": "Benefíciate +",
-      "primerAnio": {
-        "potPuntaDia": 0.1129576031497485,
-        "potValleDia": 0.07312104705053331,
-        "ePunta": 0.17682713421145096,
-        "eLlano": 0.12100353915136644,
-        "eValle": 0.0977306037460354,
-        "fijoDia": -0.1464999999999992,
-        "constante": 0.09559999999999391
-      },
-      "segundoAnio": {
-        "potPuntaDia": 0.11269552054383283,
-        "potValleDia": 0.07312104705053331,
-        "ePunta": 0.17682713421145102,
-        "eLlano": 0.12100353915136644,
-        "eValle": 0.09765197896426064,
-        "fijoDia": 0.06264999999999976,
-        "constante": 0.13119999999999266
-      },
-      "tienePromocion": true,
       "soloNuevosClientes": false,
       "penalizacion": false,
       "verde": true,
@@ -492,60 +411,6 @@
       "sospechosa": false
     },
     {
-      "comercializadora": "AGRI-ENERGIA, S.A.",
-      "tarifa": "TARIFA 10 TRANQUILIDAD",
-      "primerAnio": {
-        "potPuntaDia": 0.08989433382915028,
-        "potValleDia": 0.021228691079187154,
-        "ePunta": 0.15607019182291254,
-        "eLlano": 0.15607019182291254,
-        "eValle": 0.15607019182291254,
-        "fijoDia": 0.06439999999999929,
-        "constante": -0.0899999999999892
-      },
-      "segundoAnio": {
-        "potPuntaDia": 0.08989433382915028,
-        "potValleDia": 0.021228691079187154,
-        "ePunta": 0.15607019182291254,
-        "eLlano": 0.15607019182291254,
-        "eValle": 0.15607019182291254,
-        "fijoDia": 0.06439999999999929,
-        "constante": -0.0899999999999892
-      },
-      "tienePromocion": false,
-      "soloNuevosClientes": false,
-      "penalizacion": true,
-      "verde": false,
-      "sospechosa": false
-    },
-    {
-      "comercializadora": "MY ENERGIA ONER S.L",
-      "tarifa": "Tarifa Estándar 3 periodos",
-      "primerAnio": {
-        "potPuntaDia": 0.08439059910491657,
-        "potValleDia": 0.010483304236635566,
-        "ePunta": 0.25128480255215535,
-        "eLlano": 0.17242414643206405,
-        "eValle": 0.14545584628331898,
-        "fijoDia": 0.05969999999999931,
-        "constante": 0.034200000000026876
-      },
-      "segundoAnio": {
-        "potPuntaDia": 0.08439059910491657,
-        "potValleDia": 0.010483304236635566,
-        "ePunta": 0.25128480255215535,
-        "eLlano": 0.17242414643206405,
-        "eValle": 0.14545584628331898,
-        "fijoDia": 0.05969999999999931,
-        "constante": 0.034200000000026876
-      },
-      "tienePromocion": false,
-      "soloNuevosClientes": false,
-      "penalizacion": true,
-      "verde": false,
-      "sospechosa": false
-    },
-    {
       "comercializadora": "ENDESA ENERGÍA S.A.U.",
       "tarifa": "Conecta 3 Periodos",
       "primerAnio": {
@@ -654,60 +519,6 @@
       "sospechosa": false
     },
     {
-      "comercializadora": "TELECOR S.A. UNIPERSONAL",
-      "tarifa": "Despreocúpate +",
-      "primerAnio": {
-        "potPuntaDia": 0.09985347285395417,
-        "potValleDia": 0.09985347285395417,
-        "ePunta": 0.11809442222570003,
-        "eLlano": 0.11809442222570003,
-        "eValle": 0.11809442222570003,
-        "fijoDia": -0.14630000000000087,
-        "constante": -0.029999999999992255
-      },
-      "segundoAnio": {
-        "potPuntaDia": 0.09959139024803815,
-        "potValleDia": 0.09959139024803815,
-        "ePunta": 0.11801579744392528,
-        "eLlano": 0.11801579744392528,
-        "eValle": 0.11801579744392528,
-        "fijoDia": 0.06400000000000006,
-        "constante": 0.020000000000017337
-      },
-      "tienePromocion": true,
-      "soloNuevosClientes": false,
-      "penalizacion": false,
-      "verde": true,
-      "sospechosa": false
-    },
-    {
-      "comercializadora": "AGRI-ENERGIA, S.A.",
-      "tarifa": "TARIFA 10 EFICIENT",
-      "primerAnio": {
-        "potPuntaDia": 0.08937016861731861,
-        "potValleDia": 0.021228691079187154,
-        "ePunta": 0.2384689631228684,
-        "eLlano": 0.16534791607233504,
-        "eValle": 0.12910189167416744,
-        "fijoDia": 0.06269999999999964,
-        "constante": 0.045599999999986096
-      },
-      "segundoAnio": {
-        "potPuntaDia": 0.08937016861731861,
-        "potValleDia": 0.021228691079187154,
-        "ePunta": 0.2384689631228684,
-        "eLlano": 0.16534791607233504,
-        "eValle": 0.12910189167416744,
-        "fijoDia": 0.06269999999999964,
-        "constante": 0.045599999999986096
-      },
-      "tienePromocion": false,
-      "soloNuevosClientes": false,
-      "penalizacion": true,
-      "verde": false,
-      "sospechosa": false
-    },
-    {
       "comercializadora": "SUMINISTROS ESPECIALES ALGINETENSES S.COOP V.",
       "tarifa": "Tarifa ESTABLE 24H",
       "primerAnio": {
@@ -735,33 +546,6 @@
       "sospechosa": false
     },
     {
-      "comercializadora": "FENIE ENERGIA, S.A.",
-      "tarifa": "Fijo 3 Periodos 2.0TD",
-      "primerAnio": {
-        "potPuntaDia": 0.07574187310969224,
-        "potValleDia": 0.001834578241411238,
-        "ePunta": 0.27479361230281074,
-        "eLlano": 0.19357421272947636,
-        "eValle": 0.16723491083492942,
-        "fijoDia": 0.06359999999999905,
-        "constante": 0.06340000000002632
-      },
-      "segundoAnio": {
-        "potPuntaDia": 0.07574187310969224,
-        "potValleDia": 0.001834578241411238,
-        "ePunta": 0.27479361230281074,
-        "eLlano": 0.19357421272947636,
-        "eValle": 0.16723491083492942,
-        "fijoDia": 0.06359999999999905,
-        "constante": 0.06340000000002632
-      },
-      "tienePromocion": false,
-      "soloNuevosClientes": false,
-      "penalizacion": false,
-      "verde": false,
-      "sospechosa": false
-    },
-    {
       "comercializadora": "COMPAÑIA LUMISA ENERGIAS, SL",
       "tarifa": "2.0TD 3 periodos ",
       "primerAnio": {
@@ -785,33 +569,6 @@
       "tienePromocion": false,
       "soloNuevosClientes": false,
       "penalizacion": false,
-      "verde": false,
-      "sospechosa": false
-    },
-    {
-      "comercializadora": "MY ENERGIA ONER S.L",
-      "tarifa": "Tarifa Estándar 24 horas",
-      "primerAnio": {
-        "potPuntaDia": 0.08439059910491657,
-        "potValleDia": 0.010483304236635566,
-        "ePunta": 0.18091562286373894,
-        "eLlano": 0.18091562286373894,
-        "eValle": 0.18091562286373894,
-        "fijoDia": 0.05970000000000075,
-        "constante": 0.03999999999997428
-      },
-      "segundoAnio": {
-        "potPuntaDia": 0.08439059910491657,
-        "potValleDia": 0.010483304236635566,
-        "ePunta": 0.18091562286373894,
-        "eLlano": 0.18091562286373894,
-        "eValle": 0.18091562286373894,
-        "fijoDia": 0.05970000000000075,
-        "constante": 0.03999999999997428
-      },
-      "tienePromocion": false,
-      "soloNuevosClientes": false,
-      "penalizacion": true,
       "verde": false,
       "sospechosa": false
     },
@@ -864,33 +621,6 @@
         "constante": 0.07999999999997343
       },
       "tienePromocion": true,
-      "soloNuevosClientes": false,
-      "penalizacion": false,
-      "verde": false,
-      "sospechosa": false
-    },
-    {
-      "comercializadora": "FENIE ENERGIA, S.A.",
-      "tarifa": "Fijo Uniprecio 2.0TD",
-      "primerAnio": {
-        "potPuntaDia": 0.07626603832152391,
-        "potValleDia": 0.002096660847327076,
-        "ePunta": 0.205525179559241,
-        "eLlano": 0.205525179559241,
-        "eValle": 0.205525179559241,
-        "fijoDia": 0.06415000000000043,
-        "constante": -0.09999999999999432
-      },
-      "segundoAnio": {
-        "potPuntaDia": 0.07626603832152391,
-        "potValleDia": 0.002096660847327076,
-        "ePunta": 0.205525179559241,
-        "eLlano": 0.205525179559241,
-        "eValle": 0.205525179559241,
-        "fijoDia": 0.06415000000000043,
-        "constante": -0.09999999999999432
-      },
-      "tienePromocion": false,
       "soloNuevosClientes": false,
       "penalizacion": false,
       "verde": false,
@@ -975,33 +705,6 @@
       "soloNuevosClientes": true,
       "penalizacion": false,
       "verde": true,
-      "sospechosa": false
-    },
-    {
-      "comercializadora": "ELECTRICIDAD ELEIA S.L.",
-      "tarifa": "TU DECIDES 3",
-      "primerAnio": {
-        "potPuntaDia": 0.08963225122323444,
-        "potValleDia": 0.015462873749037603,
-        "ePunta": 0.2621350224370732,
-        "eLlano": 0.18351024066230623,
-        "eValle": 0.15819306093083127,
-        "fijoDia": 0.06084999999999935,
-        "constante": 0.11319999999999553
-      },
-      "segundoAnio": {
-        "potPuntaDia": 0.08989433382915028,
-        "potValleDia": 0.01572495635495344,
-        "ePunta": 0.37456846037499003,
-        "eLlano": 0.262213647218848,
-        "eValle": 0.22596762282068042,
-        "fijoDia": 0.06054999999999927,
-        "constante": 0.047800000000016496
-      },
-      "tienePromocion": true,
-      "soloNuevosClientes": false,
-      "penalizacion": true,
-      "verde": false,
       "sospechosa": false
     },
     {
@@ -1113,33 +816,6 @@
       "sospechosa": false
     },
     {
-      "comercializadora": "FENIE ENERGIA, S.A.",
-      "tarifa": "Fijo Energético 3P 2.0TD",
-      "primerAnio": {
-        "potPuntaDia": 0.12344090738638405,
-        "potValleDia": 0.033284490951317934,
-        "ePunta": 0.21881276767917654,
-        "eLlano": 0.13759336810584227,
-        "eValle": 0.10928844666692614,
-        "fijoDia": 0.06030000000000013,
-        "constante": 0.07340000000003855
-      },
-      "segundoAnio": {
-        "potPuntaDia": 0.12344090738638405,
-        "potValleDia": 0.033284490951317934,
-        "ePunta": 0.21881276767917654,
-        "eLlano": 0.13759336810584227,
-        "eValle": 0.10928844666692614,
-        "fijoDia": 0.06030000000000013,
-        "constante": 0.07340000000003855
-      },
-      "tienePromocion": false,
-      "soloNuevosClientes": false,
-      "penalizacion": false,
-      "verde": false,
-      "sospechosa": false
-    },
-    {
       "comercializadora": "GESTERNOVA, S.A",
       "tarifa": "Tarifa Facil",
       "primerAnio": {
@@ -1164,33 +840,6 @@
       "soloNuevosClientes": false,
       "penalizacion": false,
       "verde": true,
-      "sospechosa": false
-    },
-    {
-      "comercializadora": "NATURGY CLIENTES, S.A.U.",
-      "tarifa": "Por Uso Luz",
-      "primerAnio": {
-        "potPuntaDia": 0.12317882478046822,
-        "potValleDia": 0.06132732978431818,
-        "ePunta": 0.11196168924726825,
-        "eLlano": 0.11196168924726825,
-        "eValle": 0.11196168924726825,
-        "fijoDia": 0.06240000000000068,
-        "constante": 0.060000000000002274
-      },
-      "segundoAnio": {
-        "potPuntaDia": 0.12317882478046822,
-        "potValleDia": 0.06132732978431818,
-        "ePunta": 0.11196168924726825,
-        "eLlano": 0.11196168924726825,
-        "eValle": 0.11196168924726825,
-        "fijoDia": 0.06240000000000068,
-        "constante": 0.060000000000002274
-      },
-      "tienePromocion": false,
-      "soloNuevosClientes": true,
-      "penalizacion": false,
-      "verde": false,
       "sospechosa": false
     },
     {
@@ -1248,33 +897,6 @@
       "sospechosa": false
     },
     {
-      "comercializadora": "ENERGIA NUFRI SL",
-      "tarifa": "ENERGIA NUFRI - 2a RESIDENCIA 1P",
-      "primerAnio": {
-        "potPuntaDia": 0.08360435128716887,
-        "potValleDia": 0.009959139024803889,
-        "ePunta": 0.20977091777507834,
-        "eLlano": 0.20977091777507834,
-        "eValle": 0.20977091777507834,
-        "fijoDia": 0.0634499999999994,
-        "constante": -0.009999999999976694
-      },
-      "segundoAnio": {
-        "potPuntaDia": 0.08360435128716887,
-        "potValleDia": 0.009959139024803889,
-        "ePunta": 0.20977091777507834,
-        "eLlano": 0.20977091777507834,
-        "eValle": 0.20977091777507834,
-        "fijoDia": 0.0634499999999994,
-        "constante": -0.009999999999976694
-      },
-      "tienePromocion": false,
-      "soloNuevosClientes": true,
-      "penalizacion": false,
-      "verde": true,
-      "sospechosa": false
-    },
-    {
       "comercializadora": "DOMESTICA GAS Y ELECTRICIDAD SLU",
       "tarifa": "Fijo 24 h",
       "primerAnio": {
@@ -1323,33 +945,6 @@
         "constante": 0.04999999999999183
       },
       "tienePromocion": true,
-      "soloNuevosClientes": false,
-      "penalizacion": false,
-      "verde": false,
-      "sospechosa": false
-    },
-    {
-      "comercializadora": "FENIE ENERGIA, S.A.",
-      "tarifa": "Fijo Energético 1P 2.0TD",
-      "primerAnio": {
-        "potPuntaDia": 0.12344090738638425,
-        "potValleDia": 0.03328449095131812,
-        "ePunta": 0.1494657101538321,
-        "eLlano": 0.1494657101538321,
-        "eValle": 0.1494657101538321,
-        "fijoDia": 0.06029999999999991,
-        "constante": 0.04999999999999005
-      },
-      "segundoAnio": {
-        "potPuntaDia": 0.12344090738638425,
-        "potValleDia": 0.03328449095131812,
-        "ePunta": 0.1494657101538321,
-        "eLlano": 0.1494657101538321,
-        "eValle": 0.1494657101538321,
-        "fijoDia": 0.06029999999999991,
-        "constante": 0.04999999999999005
-      },
-      "tienePromocion": false,
       "soloNuevosClientes": false,
       "penalizacion": false,
       "verde": false,
@@ -1461,33 +1056,6 @@
       "soloNuevosClientes": false,
       "penalizacion": false,
       "verde": true,
-      "sospechosa": false
-    },
-    {
-      "comercializadora": "CIDE HCENERGÍA S.A.U",
-      "tarifa": "Plan Vehículo Eléctrico",
-      "primerAnio": {
-        "potPuntaDia": 0.08910808601140277,
-        "potValleDia": 0.08884600340548675,
-        "ePunta": 0.2257317484753561,
-        "eLlano": 0.22187913416839256,
-        "eValle": 0.061170080220768745,
-        "fijoDia": 0.06114999999999926,
-        "constante": -0.02140000000000697
-      },
-      "segundoAnio": {
-        "potPuntaDia": 0.08910808601140277,
-        "potValleDia": 0.08884600340548675,
-        "ePunta": 0.2257317484753561,
-        "eLlano": 0.22187913416839256,
-        "eValle": 0.061170080220768745,
-        "fijoDia": 0.06114999999999926,
-        "constante": -0.02140000000000697
-      },
-      "tienePromocion": false,
-      "soloNuevosClientes": false,
-      "penalizacion": false,
-      "verde": false,
       "sospechosa": false
     },
     {
@@ -1626,60 +1194,6 @@
       "sospechosa": false
     },
     {
-      "comercializadora": "CORPORACIÓN ALIMENTARIA GUISSONA, S.A.",
-      "tarifa": "TARIFA TRIPLE",
-      "primerAnio": {
-        "potPuntaDia": 0.0870114251640755,
-        "potValleDia": 0.0870114251640755,
-        "ePunta": 0.20906329473910545,
-        "eLlano": 0.14899396146318347,
-        "eValle": 0.12501340302187955,
-        "fijoDia": 0.0623999999999989,
-        "constante": 0.037200000000034095
-      },
-      "segundoAnio": {
-        "potPuntaDia": 0.0870114251640755,
-        "potValleDia": 0.0870114251640755,
-        "ePunta": 0.20906329473910545,
-        "eLlano": 0.14899396146318347,
-        "eValle": 0.12501340302187955,
-        "fijoDia": 0.0623999999999989,
-        "constante": 0.037200000000034095
-      },
-      "tienePromocion": false,
-      "soloNuevosClientes": false,
-      "penalizacion": false,
-      "verde": false,
-      "sospechosa": false
-    },
-    {
-      "comercializadora": "NATURGY CLIENTES, S.A.U.",
-      "tarifa": "Plan Fijo Luz 24h",
-      "primerAnio": {
-        "potPuntaDia": 0.12265465956863673,
-        "potValleDia": 0.043767795187953686,
-        "ePunta": 0.15732818833130885,
-        "eLlano": 0.15732818833130885,
-        "eValle": 0.15732818833130885,
-        "fijoDia": 0.06374999999999997,
-        "constante": 0.07999999999995211
-      },
-      "segundoAnio": {
-        "potPuntaDia": 0.12265465956863673,
-        "potValleDia": 0.043767795187953686,
-        "ePunta": 0.15732818833130885,
-        "eLlano": 0.15732818833130885,
-        "eValle": 0.15732818833130885,
-        "fijoDia": 0.06374999999999997,
-        "constante": 0.07999999999995211
-      },
-      "tienePromocion": false,
-      "soloNuevosClientes": false,
-      "penalizacion": true,
-      "verde": false,
-      "sospechosa": false
-    },
-    {
       "comercializadora": "ELEK COMERCIALIZADORA ELECTRICA S.L.",
       "tarifa": "2.0TD ON LINE PRECIO UNICO",
       "primerAnio": {
@@ -1707,114 +1221,6 @@
       "sospechosa": false
     },
     {
-      "comercializadora": "NATURGY CLIENTES, S.A.U.",
-      "tarifa": "Plan Fijo Luz 2.0TD Trihoraria",
-      "primerAnio": {
-        "potPuntaDia": 0.12291674217455256,
-        "potValleDia": 0.04402987779386952,
-        "ePunta": 0.23697509226914779,
-        "eLlano": 0.164011294782164,
-        "eValle": 0.1290232668923927,
-        "fijoDia": 0.06345000000000023,
-        "constante": 0.010399999999961551
-      },
-      "segundoAnio": {
-        "potPuntaDia": 0.12291674217455256,
-        "potValleDia": 0.04402987779386952,
-        "ePunta": 0.23697509226914779,
-        "eLlano": 0.164011294782164,
-        "eValle": 0.1290232668923927,
-        "fijoDia": 0.06345000000000023,
-        "constante": 0.010399999999961551
-      },
-      "tienePromocion": false,
-      "soloNuevosClientes": false,
-      "penalizacion": true,
-      "verde": false,
-      "sospechosa": false
-    },
-    {
-      "comercializadora": "MY ENERGIA ONER S.L",
-      "tarifa": "Tarifa Estándar Reducida 24 horas",
-      "primerAnio": {
-        "potPuntaDia": 0.08963225122323444,
-        "potValleDia": 0.08963225122323444,
-        "ePunta": 0.15591294225936297,
-        "eLlano": 0.15591294225936297,
-        "eValle": 0.15591294225936297,
-        "fijoDia": 0.06140000000000001,
-        "constante": 0.05999999999998806
-      },
-      "segundoAnio": {
-        "potPuntaDia": 0.08963225122323444,
-        "potValleDia": 0.08963225122323444,
-        "ePunta": 0.15591294225936297,
-        "eLlano": 0.15591294225936297,
-        "eValle": 0.15591294225936297,
-        "fijoDia": 0.06140000000000001,
-        "constante": 0.05999999999998806
-      },
-      "tienePromocion": false,
-      "soloNuevosClientes": false,
-      "penalizacion": true,
-      "verde": false,
-      "sospechosa": false
-    },
-    {
-      "comercializadora": "CORPORACIÓN ALIMENTARIA GUISSONA, S.A.",
-      "tarifa": "TARIFA RELAX",
-      "primerAnio": {
-        "potPuntaDia": 0.09330140770605673,
-        "potValleDia": 0.09330140770605673,
-        "ePunta": 0.1490725862449582,
-        "eLlano": 0.1490725862449582,
-        "eValle": 0.1490725862449582,
-        "fijoDia": 0.0591999999999997,
-        "constante": 0.04000000000005244
-      },
-      "segundoAnio": {
-        "potPuntaDia": 0.09330140770605673,
-        "potValleDia": 0.09330140770605673,
-        "ePunta": 0.1490725862449582,
-        "eLlano": 0.1490725862449582,
-        "eValle": 0.1490725862449582,
-        "fijoDia": 0.0591999999999997,
-        "constante": 0.04000000000005244
-      },
-      "tienePromocion": false,
-      "soloNuevosClientes": false,
-      "penalizacion": false,
-      "verde": false,
-      "sospechosa": false
-    },
-    {
-      "comercializadora": "CORPORACIÓN ALIMENTARIA GUISSONA, S.A.",
-      "tarifa": "TARIFA TRIPLE SOLAR",
-      "primerAnio": {
-        "potPuntaDia": 0.09330140770605692,
-        "potValleDia": 0.09330140770605692,
-        "ePunta": 0.2429505756840301,
-        "eLlano": 0.14899396146318353,
-        "eValle": 0.1290232668923927,
-        "fijoDia": 0.059199999999999475,
-        "constante": 0.05339999999999279
-      },
-      "segundoAnio": {
-        "potPuntaDia": 0.09330140770605692,
-        "potValleDia": 0.09330140770605692,
-        "ePunta": 0.2429505756840301,
-        "eLlano": 0.14899396146318353,
-        "eValle": 0.1290232668923927,
-        "fijoDia": 0.059199999999999475,
-        "constante": 0.05339999999999279
-      },
-      "tienePromocion": false,
-      "soloNuevosClientes": false,
-      "penalizacion": false,
-      "verde": false,
-      "sospechosa": false
-    },
-    {
       "comercializadora": "INER EUSKADI, S.L.",
       "tarifa": "LA CLASICA",
       "primerAnio": {
@@ -1869,6 +1275,33 @@
       "sospechosa": false
     },
     {
+      "comercializadora": "ENERGIA NUFRI SL",
+      "tarifa": "ENERGIA NUFRI - SOLAR",
+      "primerAnio": {
+        "potPuntaDia": 0.11190927272608514,
+        "potValleDia": 0.0377398952518883,
+        "ePunta": 0.29334906080165574,
+        "eLlano": 0.2083556717031326,
+        "eValle": 0.16872878168865008,
+        "fijoDia": 0.06134999999999968,
+        "constante": -0.015800000000027126
+      },
+      "segundoAnio": {
+        "potPuntaDia": 0.11190927272608514,
+        "potValleDia": 0.0377398952518883,
+        "ePunta": 0.29334906080165574,
+        "eLlano": 0.2083556717031326,
+        "eValle": 0.16872878168865008,
+        "fijoDia": 0.06134999999999968,
+        "constante": -0.015800000000027126
+      },
+      "tienePromocion": false,
+      "soloNuevosClientes": false,
+      "penalizacion": false,
+      "verde": true,
+      "sospechosa": false
+    },
+    {
       "comercializadora": "INER ENERGIA CASTILLA LA MANCHA SL",
       "tarifa": "TRANQUILIDAD",
       "primerAnio": {
@@ -1915,60 +1348,6 @@
         "eValle": 0.1797362511371174,
         "fijoDia": 0.06229999999999991,
         "constante": 0.04999999999999716
-      },
-      "tienePromocion": false,
-      "soloNuevosClientes": false,
-      "penalizacion": false,
-      "verde": false,
-      "sospechosa": false
-    },
-    {
-      "comercializadora": "MET ENERGIA ESPAÑA, S.A",
-      "tarifa": "PRECIO FIJO 24 h ELECTRICIDAD",
-      "primerAnio": {
-        "potPuntaDia": 0.09906722503620648,
-        "potValleDia": 0.09906722503620648,
-        "ePunta": 0.17006540297882108,
-        "eLlano": 0.17006540297882108,
-        "eValle": 0.17006540297882108,
-        "fijoDia": 0.032599999999999296,
-        "constante": -0.03999999999999204
-      },
-      "segundoAnio": {
-        "potPuntaDia": 0.09906722503620648,
-        "potValleDia": 0.09906722503620648,
-        "ePunta": 0.17006540297882108,
-        "eLlano": 0.17006540297882108,
-        "eValle": 0.17006540297882108,
-        "fijoDia": 0.032599999999999296,
-        "constante": -0.03999999999999204
-      },
-      "tienePromocion": false,
-      "soloNuevosClientes": false,
-      "penalizacion": true,
-      "verde": false,
-      "sospechosa": false
-    },
-    {
-      "comercializadora": "CORPORACIÓN ALIMENTARIA GUISSONA, S.A.",
-      "tarifa": "TARIFA RELAX SOLAR",
-      "primerAnio": {
-        "potPuntaDia": 0.09723264679479524,
-        "potValleDia": 0.09723264679479524,
-        "ePunta": 0.1689646560339744,
-        "eLlano": 0.1689646560339744,
-        "eValle": 0.1689646560339744,
-        "fijoDia": 0.06270000000000076,
-        "constante": -0.030000000000040217
-      },
-      "segundoAnio": {
-        "potPuntaDia": 0.09723264679479524,
-        "potValleDia": 0.09723264679479524,
-        "ePunta": 0.1689646560339744,
-        "eLlano": 0.1689646560339744,
-        "eValle": 0.1689646560339744,
-        "fijoDia": 0.06270000000000076,
-        "constante": -0.030000000000040217
       },
       "tienePromocion": false,
       "soloNuevosClientes": false,
